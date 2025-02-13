@@ -1,0 +1,10 @@
+.nav-tabs .nav-link {
+    color: #B6DB16;
+    font-weight: normal;
+  }
+  
+  .nav-tabs .nav-link.active {
+    color: black;
+    font-weight:normal;
+  }
+  

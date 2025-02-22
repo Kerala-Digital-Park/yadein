@@ -57,7 +57,7 @@ function BatchList() {
   return (
     <>
       <Header />
-      <div className="d-flex flex-column flex-lg-row">
+      <div className="d-flex flex-column flex-lg-row" style={{minHeight:"800px"}}>
         <div className="content w-100 p-3">
           <Container>
             <Row className="mb-3">
@@ -76,7 +76,7 @@ function BatchList() {
               <Col>
                 <Table responsive striped>
                   <thead>
-                    <tr>
+                    <tr >
                       <th>No</th>
                       <th>Year</th>
                       <th>Actions</th>
@@ -85,27 +85,25 @@ function BatchList() {
                   <tbody>
                     {batch.map((i, index) => (
                       <tr key={i._id}>
-                        <td
-                          onClick={() => navigate(`/admin/batch/${i._id}`)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          {index + 1}
-                        </td>
-                        <td
-                          onClick={() => navigate(`/admin/batch/${i._id}`)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          {i.year}
-                        </td>
+                        <td>{index + 1}</td>
+                        <td>{i.year}</td>
                         <td className="d-flex">
                           <EditBatch
                             batchData={i}
                             refreshBatchList={listBatch}
                           />
                           <Button
+                            variant="success"
+                            onClick={() => navigate(`/admin/batch/${i._id}`)}
+                            style={{ cursor: "pointer" }}
+                            className="ms-4"
+                          >
+                            Classes
+                          </Button>
+                          <Button
                             variant="danger"
                             onClick={() => handleDelete(i._id)}
-                            className="ms-2"
+                            className="ms-4"
                           >
                             Delete
                           </Button>

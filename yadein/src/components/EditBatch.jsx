@@ -69,7 +69,7 @@ function EditBatch({ batchData, refreshBatchList }) {
 
   return (
     <>
-      <Button variant="warning" onClick={handleShow} className="me-3">
+      <Button variant="warning" onClick={handleShow}>
         Edit
       </Button>
 

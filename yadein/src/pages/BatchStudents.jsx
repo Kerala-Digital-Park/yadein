@@ -86,7 +86,7 @@ function BatchStudents() {
   return (
     <>
       <Header />
-      <div className="d-flex flex-column flex-lg-row">
+      <div className="d-flex flex-column flex-lg-row" style={{minHeight:"800px"}}>
         <div className="content w-100 p-3">
           <Container>
             <Row className="mb-3">

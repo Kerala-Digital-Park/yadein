@@ -3,9 +3,9 @@ const bcrypt = require("bcryptjs");
 
 const StudentSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  batch:{ type: mongoose.Schema.Types.ObjectId, ref:'batches', required: true },
-  classForm:{ type: mongoose.Schema.Types.ObjectId, ref:'classes', required: true },
-  password: { type: String},
+  batch: { type: mongoose.Schema.Types.ObjectId, ref: "batches", required: true },
+  classForm: { type: mongoose.Schema.Types.ObjectId, ref: "classes", required: true },
+  password: { type: String },
   email: { type: String },
   contact: { type: Number, default: null },
   whatsapp: { type: Number, default: null },
@@ -14,13 +14,11 @@ const StudentSchema = new mongoose.Schema({
   gender: {
     type: String,
     enum: ["male", "female", "other"],
-    required: true
+    required: true,
   },
-  occupation: {
-    type: String,
-    default: null,
-  },
+  occupation: { type: String, default: null },
   profileImage: { type: String },
+  maskNumber: { type: Boolean, default: false }, 
 });
 
 StudentSchema.pre("save", async function (next) {
@@ -30,6 +28,5 @@ StudentSchema.pre("save", async function (next) {
   }
   next();
 });
-
 
 module.exports = mongoose.model("students", StudentSchema);

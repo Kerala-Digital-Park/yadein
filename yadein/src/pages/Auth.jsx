@@ -35,7 +35,11 @@ const AuthPage = () => {
     event.preventDefault();
 
     if (!adminType) {
-      alert("Please select an Admin Type.");
+      Swal.fire({
+        icon: "warning",
+        title: "Incomplete Form",
+        text: "Please select an Admin Type.",
+      });
       return;
     }
 
@@ -43,17 +47,17 @@ const AuthPage = () => {
 
     try {
       const response = await axios.post(`${baseURL}/admin/login`, reqBody);
+
       if (response?.status === 200) {
         sessionStorage.setItem("userId", response.data.userId);
-        sessionStorage.setItem("token", response.data.token);
+        sessionStorage.setItem("adminToken", response.data.token);
         sessionStorage.setItem("adminType", response.data.adminType);
-
         redirectToDashboard(response.data.adminType);
       } else {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: response?.message || "Login failed",
+          text: "Login failed",
         });
       }
     } catch (error) {
@@ -62,7 +66,7 @@ const AuthPage = () => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: error.response?.message || "An error occurred!",
+          text: error.response?.message || "Login Failed!",
         });
       } else {
         Swal.fire("Server is unreachable. Please try again later.");
@@ -73,9 +77,10 @@ const AuthPage = () => {
   return (
     <Container
       fluid
-      className="d-flex justify-content-center align-items-center vh-100"
+      className="d-flex flex-column justify-content-center align-items-center vh-100"
       style={{
         backgroundColor: "#D1D2AF",
+        // minHeight:"800px"
       }}
     >
       <Card
@@ -85,7 +90,7 @@ const AuthPage = () => {
           maxWidth: "420px",
           borderRadius: "12px",
           backgroundColor: "rgba(255, 255, 255, 0.9)", // Slight transparency
-          backdropFilter: "blur(8px)",
+          // backdropFilter: "blur(8px)",
         }}
       >
         <div className="text-center mb-4">
@@ -148,12 +153,16 @@ const AuthPage = () => {
             }}
             onMouseOver={(e) => (e.target.style.backgroundColor = "#BFD168")}
             onMouseOut={(e) => (e.target.style.backgroundColor = "#BED174")}
-            // BFD168     BED174              C2D18A
           >
             Login
           </Button>
         </Form>
       </Card>
+      <p className="text-center mt-5" style={{
+        color: "black"
+      }}>
+        &copy; 2025 Yadein. All Rights Reserved.
+      </p>
     </Container>
   );
 };

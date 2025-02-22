@@ -61,7 +61,7 @@ function ClassList() {
   return (
     <>
       <Header />
-      <div className="d-flex flex-column flex-lg-row">
+      <div className="d-flex flex-column flex-lg-row" style={{minHeight:"800px"}}>
         <div className="content w-100 p-3">
           <Container>
             <Row className="mb-3">
@@ -94,16 +94,29 @@ function ClassList() {
                       <th>No</th>
                       <th>Batch</th>
                       <th>Class</th>
+                      <th>Image</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredClasses.map((i, index) => (
                       <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{i.batch.year}</td>
-                        <td>{i.classForm}</td>
-                        <td className="d-flex flex-wap gap-2">
+                        <td className="align-middle">{index + 1}</td>
+                        <td className="align-middle">{i.batch.year}</td>
+                        <td className="align-middle">{i.classForm}</td>
+                        <td className="align-middle">
+                          {i.profileImage && (
+                            <img
+                              src={`${baseURL}/uploads/${i.profileImage}`}
+                              alt="Profile"
+                              width="100"
+                              className="img-fluid"
+                            />
+                          )}
+                        </td>
+                        <td className="align-middle">
+                          <div className="d-flex align-items-center gap-2">
+                            
                           <EditClass
                             classData={i}
                             refreshClassList={listClass}
@@ -114,6 +127,7 @@ function ClassList() {
                           >
                             Delete
                           </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}

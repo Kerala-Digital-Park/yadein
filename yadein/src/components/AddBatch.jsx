@@ -37,7 +37,6 @@ function AddBatch({ refreshBatchList }) {
       const reqBody = { year };
 
       const result = await axios.post(`${baseURL}/admin/add-batch`, reqBody);
-      console.log(result);
 
       if (result.status === 201) {
         Swal.fire({

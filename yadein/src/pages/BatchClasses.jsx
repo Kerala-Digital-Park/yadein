@@ -68,7 +68,7 @@ function BatchClasses() {
   return (
     <>
       <Header />
-      <div className="d-flex flex-column flex-lg-row">
+      <div className="d-flex flex-column flex-lg-row" style={{minHeight:"800px"}}>
         <div className="content w-100 p-3">
           <Container>
             <Row className="mb-3">
@@ -89,6 +89,7 @@ function BatchClasses() {
                     <tr>
                       <th>No</th>
                       <th>Class Name</th>
+                      <th>Image</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -96,33 +97,43 @@ function BatchClasses() {
                     {classes.length > 0 ? (
                       classes.map((c, index) => (
                         <tr key={c._id}>
-                          <td
-                            onClick={() =>
-                              navigate(`/admin/batch/${c.batch._id}/${c._id}`)
-                            }
-                            style={{ cursor: "pointer" }}
-                          >
+                          <td className="align-middle">
                             {index + 1}
                           </td>
-                          <td
-                            onClick={() =>
-                              navigate(`/admin/batch/${c.batch._id}/${c._id}`)
-                            }
-                            style={{ cursor: "pointer" }}
-                          >
+                          <td className="align-middle">
                             {c.classForm}
                           </td>
-                          <td className="d-flex flex-wrap gap-2">
+                          <td className="align-middle">
+                          {c.profileImage && (
+                            <img
+                              src={`${baseURL}/uploads/${c.profileImage}`}
+                              alt="Profile"
+                              width="100"
+                              className="img-fluid"
+                            />
+                          )}
+                          </td>
+                          <td className="align-middle">
+                            <div className="d-flex align-items-center gap-2">
                             <EditClass
                               classData={c}
                               refreshClassList={fetchClasses}
                             />
+                            <Button variant="success" onClick={() =>
+                              navigate(`/admin/batch/${c.batch._id}/${c._id}`)
+                            }
+                            style={{ cursor: "pointer" }}
+                            className="ms-4">
+                              Students
+                            </Button>
                             <Button
                               variant="danger"
                               onClick={() => handleDelete(c._id)}
+                               className="ms-4"
                             >
                               Delete
                             </Button>
+                            </div>
                           </td>
                         </tr>
                       ))

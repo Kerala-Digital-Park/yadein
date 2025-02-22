@@ -8,7 +8,6 @@ const baseURL = process.env.REACT_APP_API_URL;
 
 function AddStudent({ refreshStudentList }) {
   const { year, classForm} = useParams();
-  console.log("year:",year, "cls:",classForm);
   
   const [show, setShow] = useState(false);
   const [image, setImage] = useState(null);
@@ -67,7 +66,6 @@ function AddStudent({ refreshStudentList }) {
     }
   };
 
-  console.log("batch:",batches, "classFom:",classFormName)
   const handleAdd = async (e) => {
     e.preventDefault();
 

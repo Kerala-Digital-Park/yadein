@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 
 const baseURL = process.env.REACT_APP_API_URL;
 
-function EditAdmin({ adminData, refreshAdminList }) {
+function EditAdmin({ adminData }) {
   const [show, setShow] = useState(false);
   const [adminDetails, setAdminDetails] = useState(adminData);
   const [classFormName, setClassFormName] = useState("");
@@ -57,7 +57,6 @@ function EditAdmin({ adminData, refreshAdminList }) {
           text: "Admin edited successfully.",
         });
         handleClose();
-        refreshAdminList();
       }
     } catch (error) {
       Swal.fire({

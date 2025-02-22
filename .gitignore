@@ -2,3 +2,4 @@ yadein/node_modules
 yadein/.env
 server/.env
 server/node_modules
+yadein/build

@@ -51,10 +51,10 @@ function ClassAdminDash() {
   return (
     <>
       <Header />
-      <div className="d-flex">
+      <div className="d-flex" style={{minHeight:"800px"}}>
         <div className="content w-100 p-4">
           <Container>
-            <Row className="g-4">
+            <Row className="g-4 d-flex justify-content-center align-items-center">
               {[
                 {
                   title: "Student",

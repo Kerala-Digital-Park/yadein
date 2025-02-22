@@ -47,6 +47,7 @@ function EditStudent({ studentData, refreshStudentList, batchMap, classMap }) {
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
   };
+  
   const handleEdit = async (e) => {
     e.preventDefault();
 

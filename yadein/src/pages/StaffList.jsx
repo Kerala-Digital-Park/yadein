@@ -5,7 +5,7 @@ import axios from "axios";
 import AddStaff from "../components/AddStaff";
 import EditStaff from "../components/EditStaff";
 import Swal from "sweetalert2";
-import '../styles/AdminList.css'
+import "../styles/AdminList.css";
 
 const baseURL = process.env.REACT_APP_API_URL;
 

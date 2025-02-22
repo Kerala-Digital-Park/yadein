@@ -4,6 +4,9 @@
         "batchadmins",
         "classadmin",
         "classadmins",
-        "superadmin"
+        "superadmin",
+        "Swal",
+        "sweetalert",
+        "Toastify"
     ]
 }

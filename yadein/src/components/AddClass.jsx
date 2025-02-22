@@ -6,10 +6,10 @@ import Swal from "sweetalert2";
 const baseURL = process.env.REACT_APP_API_URL;
 
 function AddClass({ refreshClassList, year }) {
-  console.log(year);
 
   const [show, setShow] = useState(false);
   const [batches, setBatches] = useState([]);
+  const [image, setImage] = useState(null);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -23,6 +23,10 @@ function AddClass({ refreshClassList, year }) {
 
   const handleClear = () => {
     setClassDetails(initialState);
+  };
+
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
   };
 
   const fetchBatchDetails = async () => {
@@ -39,7 +43,7 @@ function AddClass({ refreshClassList, year }) {
 
     const { classForm } = classDetails;
     const year = batches;
-    if ( !classForm) {
+    if (!classForm) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",
@@ -48,9 +52,17 @@ function AddClass({ refreshClassList, year }) {
       return;
     }
     try {
-      const reqBody = { year, classForm };
+      const formData = new FormData();
+      formData.append("year", year);
+      formData.append("classForm", classForm);
+      // const reqBody = { year, classForm };
+      if (image) {
+        formData.append("profileImage", image);
+      }
 
-      const result = await axios.post(`${baseURL}/admin/add-class`, reqBody);
+      const result = await axios.post(`${baseURL}/admin/add-class`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       if (result.status === 201) {
         Swal.fire({
           icon: "success",
@@ -77,18 +89,6 @@ function AddClass({ refreshClassList, year }) {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchBatches = async () => {
-  //     try {
-  //       const response = await axios.get(`${baseURL}/admin/batch-list`);
-  //       setBatches(response.data);
-  //     } catch (error) {
-  //       console.error("Error fetching batches:", error);
-  //     }
-  //   };
-  //   fetchBatches();
-  // }, []);
-
   useEffect(() => {
     fetchBatchDetails();
   }, [year]);
@@ -111,11 +111,7 @@ function AddClass({ refreshClassList, year }) {
               <div className="col-lg-6">
                 <Form.Group className="mb-3">
                   <Form.Label>Batch</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={batches}
-                    disabled
-                  />
+                  <Form.Control type="text" value={batches} disabled />
                 </Form.Group>
               </div>
 
@@ -135,6 +131,19 @@ function AddClass({ refreshClassList, year }) {
                   />
                 </Form.Group>
               </div>
+
+              <div>
+                <Form.Group className="mb-3">
+                  <Form.Label>Profile Image</Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                  {image && <small>{image.name}</small>}{" "}
+                </Form.Group>
+              </div>
+              
             </div>
           </Form>
         </Modal.Body>

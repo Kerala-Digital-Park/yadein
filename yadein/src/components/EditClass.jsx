@@ -7,6 +7,7 @@ const baseURL = process.env.REACT_APP_API_URL;
 
 function EditClass({ classData, refreshClassList }) {
   const [show, setShow] = useState(false);
+  const [image, setImage] = useState(null);
 
   const initialState = {
     year: "",
@@ -27,6 +28,10 @@ function EditClass({ classData, refreshClassList }) {
     setShow(true);
   };
 
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
   const handleClear = () => {
     setClassDetails(initialState);
   };
@@ -41,12 +46,19 @@ function EditClass({ classData, refreshClassList }) {
       });
       return;
     }
-    console.log(classDetails);
 
     try {
+      const formData = new FormData();
+      formData.append("year", classDetails.batch._id);
+      formData.append("classForm", classDetails.classForm);
+      if (image) {
+        formData.append("image", image);
+      }
+
       const result = await axios.put(
         `${baseURL}/admin/class-edit/${classData._id}`,
-        classDetails
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       if (result.status === 201) {
@@ -75,7 +87,7 @@ function EditClass({ classData, refreshClassList }) {
 
   return (
     <>
-      <Button variant="warning" onClick={handleShow} className="me-3">
+      <Button variant="warning" onClick={handleShow}>
         Edit
       </Button>
 
@@ -115,6 +127,18 @@ function EditClass({ classData, refreshClassList }) {
                     })
                   }
                 />
+              </Form.Group>
+            </div>
+
+            <div>
+              <Form.Group className="mb-3">
+                <Form.Label>Profile Image</Form.Label>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                {image && <small>{image.name}</small>}{" "}
               </Form.Group>
             </div>
           </Form>

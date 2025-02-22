@@ -134,6 +134,7 @@ function AddStaff({ refreshStaffList }) {
                   {image && <small>{image.name}</small>}{" "}
                 </Form.Group>
               </div>
+              
             </div>
           </Form>
         </Modal.Body>

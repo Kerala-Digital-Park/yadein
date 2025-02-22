@@ -9,11 +9,11 @@ const app = express();
 
 dotenv.config();
 
-app.use(cors());
-// app.use(cors({
-//   origin: '*',  // Allow requests only from your frontend
-//   credentials: true,                // Allow cookies/auth headers
-// }));
+// app.use(cors());
+app.use(cors({
+  origin: '*', 
+  credentials: true,         
+}));
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))

@@ -13,6 +13,9 @@ function SuperAdminDash() {
     studentCount: 0,
     batchCount: 0,
     classCount: 0,
+    updateCount: 0,
+    sponsorCount: 0,
+    jobCount: 0,
   });
 
   useEffect(() => {
@@ -30,16 +33,51 @@ function SuperAdminDash() {
   return (
     <>
       <Header />
-      <div className="d-flex">
+      <div className="d-flex" style={{minHeight:"800px"}}>
         <div className="content w-100 p-4">
           <Container>
             <Row className="g-4">
-              {[ 
-                { title: "Admin", count: stats.adminCount, link: "/admin/admin-list" },
-                { title: "Staff", count: stats.staffCount, link: "/admin/staff-list" },
-                { title: "Student", count: stats.studentCount, link: "/admin/student-list" },
-                { title: "Batch", count: stats.batchCount, link: "/admin/batch-list" },
-                { title: "Class", count: stats.classCount, link: "/admin/class-list" }
+              {[
+                {
+                  title: "Admin",
+                  count: stats.adminCount,
+                  link: "/admin/admin-list",
+                },
+                {
+                  title: "Staff",
+                  count: stats.staffCount,
+                  link: "/admin/staff-list",
+                },
+                {
+                  title: "Student",
+                  count: stats.studentCount,
+                  link: "/admin/student-list",
+                },
+                {
+                  title: "Batch",
+                  count: stats.batchCount,
+                  link: "/admin/batch-list",
+                },
+                {
+                  title: "Class",
+                  count: stats.classCount,
+                  link: "/admin/class-list",
+                },
+                {
+                  title: "Updates",
+                  count: stats.updateCount,
+                  link: "/admin/updates",
+                },
+                {
+                  title: "Sponsor",
+                  count: stats.sponsorCount,
+                  link: "/admin/sponsors",
+                },
+                {
+                  title: "Job",
+                  count: stats.jobCount,
+                  link: "/admin/jobs",
+                },
               ].map((item, index) => (
                 <Col key={index} xs={12} sm={6} md={4} lg={3}>
                   <Link to={item.link} style={{ textDecoration: "none" }}>
@@ -63,4 +101,3 @@ function SuperAdminDash() {
 }
 
 export default SuperAdminDash;
-

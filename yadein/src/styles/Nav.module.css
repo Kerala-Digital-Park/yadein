@@ -1,0 +1,39 @@
+@media (max-width: 990px) {
+    .navbar-nav {
+        position: absolute;
+        padding: 25px 25px;
+        left: 0;
+        top: 60px;
+        width: 100%;
+        background: white;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ;
+        transform: translateY(-20px);
+        opacity: 0;
+        visibility: hidden;
+        text-align: center;
+    }
+
+    .navbar-collapse.show .navbar-nav {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .btn {
+        width: 50%;
+        transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+    }
+
+    .nav-item {
+        width: 100%; /* Make each item take full width */
+        display: flex;
+        justify-content: center;
+        margin-top: 15px;
+        
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+}

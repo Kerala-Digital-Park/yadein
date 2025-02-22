@@ -7,6 +7,8 @@ const batchadmins = require("../models/batchAdminSchema");
 const classadmins = require("../models/classAdminSchema");
 const students = require("../models/studentSchema");
 const staffs = require("../models/staffSchema");
+const sponsors = require("../models/sponsorSchema");
+const updates = require("../models/updateSchema");
 const dotenv = require("dotenv");
 const jobs = require("../models/jobSchema");
 const path = require("path");
@@ -32,11 +34,11 @@ exports.login = async (req, res) => {
     }
 
     const admin = await collection.findOne({ email });
-    if (!admin) return res.status(400).json({ message: "Invalid credentials" });
+    if (!admin) return res.status(401).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch)
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: admin._id, adminType: admin.adminType },
@@ -48,6 +50,85 @@ exports.login = async (req, res) => {
       .json({ token, adminType: admin.adminType, userId: admin._id });
   } catch (error) {
     console.error("Login error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.userLogin = async (req, res) => {
+  console.log("Inside userLogin function");
+  try {
+    const { email, password } = req.body;
+
+    // Find student by email
+    let student = await students.findOne({ email });
+    if (!student) {
+      student = await updates.findOne({ email });
+      if (!student) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+    }
+
+    // Check password
+    let isMatch = await bcrypt.compare(password, student.password);
+    if (!isMatch) {
+      isMatch = password == student.password;
+      if (!isMatch) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: student._id }, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    res.status(201).json({ token, userId: student._id });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.userSignup = async (req, res) => {
+  console.log("Inside userSignup function");
+  const { name, email, password, year, classForm, gender } = req.body;
+  try {
+    const existingStudent = await students.findOne({ email });
+    if (existingStudent) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const batch = await batches.findOne({ year: year });
+    const cls = await classes.findOne({
+      batch: batch._id,
+      classForm: classForm,
+    });
+
+    if (!batch || !cls) {
+      return res.status(400).json({ message: "Invalid batch or class" });
+    }
+
+    const newStudent = new updates({
+      name: name,
+      email: email,
+      password: password,
+      batch: batch._id,
+      classForm: cls._id,
+      gender: gender,
+    });
+
+    await newStudent.save();
+
+    // Generate JWT token
+    const token = jwt.sign({ id: newStudent._id }, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    res
+      .status(201)
+      .json({ message: "Signup successful", token, userId: newStudent._id });
+  } catch (error) {
+    console.error("Signup error:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
@@ -114,7 +195,6 @@ exports.addClassAdmin = async (req, res) => {
 exports.dashStats = async (req, res) => {
   try {
     const { batch, cls } = req.query;
-    console.log("batch", batch, cls);
 
     const [
       classAdminCount,
@@ -124,7 +204,10 @@ exports.dashStats = async (req, res) => {
       batchCount,
       classCount,
       classCountByBatch,
-      studentCountByClass
+      studentCountByClass,
+      updateCount,
+      sponsorCount,
+      jobCount,
     ] = await Promise.all([
       classadmins.countDocuments(),
       batchadmins.countDocuments(),
@@ -133,7 +216,10 @@ exports.dashStats = async (req, res) => {
       batches.countDocuments(),
       classes.countDocuments(),
       batch ? classes.countDocuments({ batch: batch }) : 0,
-      cls ? students.countDocuments({batch: batch, classForm: cls}) : 0
+      cls ? students.countDocuments({ batch: batch, classForm: cls }) : 0,
+      updates.countDocuments(),
+      sponsors.countDocuments(),
+      jobs.countDocuments(),
     ]);
 
     const adminCount = classAdminCount + batchAdminCount;
@@ -145,7 +231,10 @@ exports.dashStats = async (req, res) => {
       batchCount,
       classCount,
       classCountByBatch,
-      studentCountByClass
+      studentCountByClass,
+      updateCount,
+      sponsorCount,
+      jobCount,
     });
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
@@ -198,7 +287,7 @@ exports.addBatch = async (req, res) => {
 
 exports.listBatch = async (req, res) => {
   try {
-    const batch = await batches.find({});
+    const batch = await batches.find({}).sort({ year: 1 });
 
     return res.status(200).json(batch);
   } catch (error) {
@@ -219,12 +308,13 @@ exports.listBatchClass = async (req, res) => {
 
     const classList = await classes
       .find({ batch: year })
-      .sort({ classForm: 1 })
       .populate("batch");
 
     if (classList.length === 0) {
       return res.status(404).json({ error: "No classes found for this batch" });
     }
+
+    classList.sort((a, b) => Number(a.classForm) - Number(b.classForm));
 
     res.status(200).json(classList);
   } catch (error) {
@@ -249,6 +339,7 @@ exports.addClass = async (req, res) => {
     const newClass = new classes({
       batch: batch._id,
       classForm: classForm,
+      profileImage: req.file ? req.file.filename : null,
     });
 
     await newClass.save();
@@ -264,7 +355,10 @@ exports.addClass = async (req, res) => {
 
 exports.listClass = async (req, res) => {
   try {
-    const classForm = await classes.find({}).populate("batch");
+    const classForm = await classes
+      .find({})
+      .sort({ classForm: 1 })
+      .populate("batch");
 
     return res.status(200).json(classForm);
   } catch (error) {
@@ -276,13 +370,13 @@ exports.listClass = async (req, res) => {
 
 exports.listStudent = async (req, res) => {
   try {
-    const student = await students.find({});
+    const student = await students.find({}).sort({ name: 1 });
 
     return res.status(200).json(student);
   } catch (error) {
     res
       .status(500)
-      .json({ error: "Unable to list class due to " + error.message });
+      .json({ error: "Unable to list student due to " + error.message });
   }
 };
 
@@ -305,7 +399,6 @@ exports.addStudent = async (req, res) => {
   try {
     const batch = await batches.findOne({ _id: year });
     const cls = await classes.findOne({ _id: classForm });
-    console.log(batch, cls);
 
     const newStudent = new students({
       name: name,
@@ -334,8 +427,9 @@ exports.addStudent = async (req, res) => {
 };
 
 exports.listStaff = async (req, res) => {
+  console.log("Inside adminController: list staff function");
   try {
-    const staff = await staffs.find({});
+    const staff = await staffs.find({}).sort({ name: 1 });
 
     return res.status(200).json(staff);
   } catch (error) {
@@ -348,7 +442,6 @@ exports.listStaff = async (req, res) => {
 exports.addStaff = async (req, res) => {
   console.log("Inside adminController: add staff function");
   const { name, staffType } = req.body;
-  console.log(req.body);
 
   try {
     const newStaff = new staffs({
@@ -368,10 +461,42 @@ exports.addStaff = async (req, res) => {
   }
 };
 
+exports.listSponsor = async (req, res) => {
+  try {
+    const sponsor = await sponsors.find({}).sort({ name: 1 });
+
+    return res.status(200).json(sponsor);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Unable to list sponsor due to " + error.message });
+  }
+};
+
+exports.addSponsor = async (req, res) => {
+  console.log("Inside adminController: add sponsor function");
+  const { name } = req.body;
+
+  try {
+    const newSponsor = new sponsors({
+      name: name,
+      profileImage: req.file ? req.file.filename : null,
+    });
+
+    await newSponsor.save();
+
+    res.status(200).json("Sponsor added successfully");
+  } catch (error) {
+    console.error("Error adding Sponsor:", error);
+    res
+      .status(500)
+      .json({ error: "Unable to add Sponsor due to " + error.message });
+  }
+};
+
 exports.listClassStudent = async (req, res) => {
   console.log("Inside adminController: list class student function");
   const { year, classForm } = req.query;
-  console.log(year, "year", classForm, "classForm");
 
   try {
     if (!year || !classForm) {
@@ -380,6 +505,7 @@ exports.listClassStudent = async (req, res) => {
 
     const studentList = await students
       .find({ batch: year, classForm: classForm })
+      .sort({ name: 1 })
       .populate("batch")
       .populate("classForm");
 
@@ -396,7 +522,7 @@ exports.listClassStudent = async (req, res) => {
 
 exports.listJobs = async (req, res) => {
   try {
-    const job = await jobs.find({});
+    const job = await jobs.find({}).sort({ job: 1 });
 
     return res.status(200).json(job);
   } catch (error) {
@@ -557,25 +683,30 @@ exports.editClass = async (req, res) => {
 
   try {
     const classId = req.params.classId;
-    const { batch, classForm } = req.body;
+    const { year, classForm } = req.body;
 
-    const existingClass = await classes.findOne({ batch, classForm });
-    console.log(batch, classForm);
+    const existingClass = await classes.findOne({ batch: year, classForm });
 
     if (existingClass) {
-      console.log("existingClass", existingClass);
       return res.json("Class already exists");
     }
 
-    if (!batch || !classForm) {
+    if (!year || !classForm) {
       return res.status(400).json({ message: "Year and class are required" });
     }
 
-    const updatedClass = await classes.findByIdAndUpdate(
-      classId,
-      { classForm },
-      { new: true }
-    );
+    let updateFields = {
+      classForm: classForm,
+    }
+
+    if (req.file) {
+      updateFields.profileImage = req.file.filename;
+    }
+
+    const updatedClass = await classes.findByIdAndUpdate(classId, updateFields, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedClass) {
       return res.status(404).json({ message: "Class not found" });
@@ -674,7 +805,6 @@ exports.editBatch = async (req, res) => {
 
 exports.getClassFormById = async (req, res) => {
   const cls = req.params.id;
-  // const year = req.params.year;
   try {
     const classForm = await classes.findById(cls).populate("classForm");
 
@@ -692,6 +822,22 @@ exports.getClassFormById = async (req, res) => {
 exports.getBatchById = async (req, res) => {
   try {
     const batch = await batches.findById(req.params.id);
+    if (!batch) {
+      return res.status(404).json({ message: "Batch not found" });
+    }
+    res.status(200).json(batch);
+  } catch (error) {
+    console.error("Error fetching batch:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getIdByBatch = async (req, res) => {
+  const year = req.params.year;
+
+  try {
+    const batch = await batches.find({ year: year });
+
     if (!batch) {
       return res.status(404).json({ message: "Batch not found" });
     }
@@ -757,6 +903,7 @@ exports.editStudent = async (req, res) => {
       instagram,
       gender,
       occupation,
+      maskNumber,
     } = req.body;
 
     if (!name || !gender) {
@@ -774,6 +921,7 @@ exports.editStudent = async (req, res) => {
       instagram: instagram ? instagram.trim() : "",
       gender,
       occupation: occupation ? occupation.trim() : "",
+      maskNumber: maskNumber,
     };
 
     if (password) {
@@ -978,6 +1126,85 @@ exports.editClassAdmin = async (req, res) => {
   }
 };
 
+exports.deleteSponsor = async (req, res) => {
+  console.log("Inside adminController: delete sponsor function");
+  try {
+    const sponsorId = req.params.sponsorId;
+
+    // Find student before deleting
+    const sponsor = await sponsors.findById(sponsorId);
+
+    if (!sponsor) {
+      return res.status(404).json({ message: "Sponsor not found" });
+    }
+
+    // Delete profile image if exists
+    if (sponsor.profileImage) {
+      const imagePath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        sponsor.profileImage
+      );
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error("Error deleting sponsor image:", err);
+        }
+      });
+    }
+
+    // Delete student from database
+    await sponsors.findByIdAndDelete(sponsorId);
+
+    res.status(200).json({ message: "Sponsor deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting sponsor:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.editSponsor = async (req, res) => {
+  console.log("Inside adminController: edit sponsor function");
+  const sponsorId = req.params.sponsorId;
+  try {
+    if (!sponsorId) {
+      return res.status(400).json({ message: "Sponsor ID is required" });
+    }
+
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    let updateFields = {
+      name: name.trim(),
+    };
+
+    if (req.file) {
+      updateFields.profileImage = req.file.filename;
+    }
+
+    const updatedSponsor = await sponsors.findByIdAndUpdate(
+      sponsorId,
+      updateFields,
+      { new: true, runValidators: true } // Ensures validation on update
+    );
+
+    if (!updatedSponsor) {
+      return res.status(404).json({ message: "Sponsor not found" });
+    }
+
+    res.status(200).json({
+      message: "Sponsor updated successfully",
+      sponsor: updatedSponsor,
+    });
+  } catch (error) {
+    console.error("Error editing sponsor:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 exports.getBatchByBatchAdmin = async (req, res) => {
   console.log("Inside admin controller get batch by batchadmin");
   try {
@@ -1009,5 +1236,254 @@ exports.getClassByClassAdmin = async (req, res) => {
   } catch (error) {
     console.error("Error fetching batch:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.fetchUser = async (req, res) => {
+  console.log("Inside admin controller: fetch user function");
+  try {
+    const userId = req.params.userId;
+    let student = await students.findById(userId);
+
+    if (!student) {
+      student = await updates.findById(userId);
+    }
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.status(200).json(student);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.listUpdates = async (req, res) => {
+  try {
+    const student = await updates.find({});
+
+    return res.status(200).json(student);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Unable to list updates due to " + error.message });
+  }
+};
+
+exports.addUpdate = async (req, res) => {
+  console.log("Inside adminController: add student function");
+  const {
+    name,
+    year,
+    classForm,
+    password,
+    email,
+    contact,
+    whatsapp,
+    facebook,
+    instagram,
+    gender,
+    occupation,
+  } = req.body;
+
+  try {
+    const batch = await batches.findOne({ _id: year });
+    const cls = await classes.findOne({ _id: classForm });
+
+    const newStudent = new students({
+      name: name,
+      batch: batch._id,
+      classForm: cls._id,
+      password: password,
+      email: email,
+      contact: contact,
+      whatsapp: whatsapp,
+      facebook: facebook,
+      instagram: instagram,
+      gender: gender || null,
+      occupation: occupation,
+      profileImage: req.file ? req.file.filename : null,
+    });
+
+    await newStudent.save();
+
+    res.status(200).json("Student added successfully");
+  } catch (error) {
+    console.error("Error adding Student:", error);
+    res
+      .status(500)
+      .json({ error: "Unable to add Student due to " + error.message });
+  }
+};
+
+exports.editUpdate = async (req, res) => {
+  console.log("Inside adminController: edit update function");
+  const studentId = req.params.studentId;
+
+  try {
+    if (!studentId) {
+      return res.status(400).json({ message: "Student ID is required" });
+    }
+
+    const {
+      batch,
+      classForm,
+      name,
+      email,
+      contact,
+      whatsapp,
+      facebook,
+      instagram,
+      gender,
+      occupation,
+      maskNumber,
+    } = req.body;
+    
+    if (!name || !gender) {
+      return res.status(400).json({ message: "Name and gender are required" });
+    }
+
+    let updateFields = {
+      name: name.trim(),
+      email: email ? email.trim() : "",
+      contact:
+        contact && contact !== "null" ? parseInt(contact, 10) || null : null,
+      whatsapp:
+        whatsapp && whatsapp !== "null" ? parseInt(whatsapp, 10) || null : null,
+      facebook: facebook ? facebook.trim() : "",
+      instagram: instagram ? instagram.trim() : "",
+      gender,
+      occupation: occupation ? occupation.trim() : "",
+      maskNumber: maskNumber,
+      batch: batch, 
+      classForm: classForm,
+    };    
+
+    if (req.file) {
+      updateFields.profileImage = req.file.filename;
+    }
+
+    let studentUpdated = await updates.findByIdAndUpdate(
+      studentId,
+      updateFields,
+      { new: true, runValidators: true } 
+    );
+
+    if (!studentUpdated) {
+      studentUpdated = new updates({
+        ...updateFields,
+        _id: studentId,
+      });
+      await studentUpdated.save();
+    }
+
+    res.status(200).json({
+      message: "Updated successfully",
+      update: studentUpdated,
+    });
+  } catch (error) {
+    console.error("Error editing student:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+exports.deleteUpdate = async (req, res) => {
+  console.log("Inside adminController: delete update function");
+  try {
+    const studentId = req.params.studentId;
+
+    const student = await updates.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    if (student.profileImage) {
+      const imagePath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        student.profileImage
+      );
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.error("Error deleting student image:", err);
+        }
+      });
+    }
+
+    await updates.findByIdAndDelete(studentId);
+
+    res.status(200).json({ message: "Update deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting update:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.addStudentUpdate = async (req, res) => {
+  console.log("Inside adminController: add student update function");
+  const {
+    studentId,
+    name,
+    batch,
+    classForm,
+    password,
+    email,
+    contact,
+    whatsapp,
+    facebook,
+    instagram,
+    gender,
+    occupation,
+    maskNumber,
+    profileImage,
+  } = req.body;
+
+  try {
+    const student = await students.findById(studentId);
+
+    let updateFields = {
+      name: name.trim(),
+      email: email ? email.trim() : "",
+      contact:
+        contact && contact !== "null" ? parseInt(contact, 10) || null : null,
+      whatsapp:
+        whatsapp && whatsapp !== "null" ? parseInt(whatsapp, 10) || null : null,
+      facebook: facebook ? facebook.trim() : "",
+      instagram: instagram ? instagram.trim() : "",
+      gender: gender || null,
+      occupation: occupation ? occupation.trim() : "",
+      maskNumber: maskNumber,
+      profileImage: profileImage,
+      batch: batch,
+      classForm: classForm,
+      password: password,
+    };
+
+    if (student) {
+      const updatedStudent = await students.findByIdAndUpdate(
+        studentId,
+        updateFields,
+        { new: true, runValidators: true }
+      );
+    } else {
+      const newStudent = new students({
+        _id: studentId,
+        ...updateFields,
+      });
+
+      await newStudent.save();
+    }
+
+    await updates.findByIdAndDelete(studentId);
+
+    res.status(200).json("Student added successfully");
+  } catch (error) {
+    console.error("Error adding Student:", error);
+    res
+      .status(500)
+      .json({ error: "Unable to add Student due to " + error.message });
   }
 };

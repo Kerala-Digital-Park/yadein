@@ -14,7 +14,7 @@ import axios from "axios";
 import useFetchMappings from "../components/useFetchMappings";
 import EditAdmin from "../components/EditAdmin";
 import Swal from "sweetalert2";
-import "../styles/AdminList.css"
+import "../styles/AdminList.css";
 
 const baseURL = process.env.REACT_APP_API_URL;
 
@@ -90,7 +90,7 @@ function AdminList() {
   return (
     <>
       <Header />
-      <div className="d-flex flex-column flex-lg-row">
+      <div className="d-flex flex-column flex-lg-row" style={{minHeight:"800px"}}>
         <div className="content w-100 p-3">
           <Container>
             <Row className="mb-3">
@@ -238,7 +238,6 @@ function AdminList() {
                               <td className="d-flex">
                                 <EditAdmin
                                   adminData={admin}
-                                  refreshAdminList={listAdmins}
                                 />
                                 <Button
                                   variant="danger"

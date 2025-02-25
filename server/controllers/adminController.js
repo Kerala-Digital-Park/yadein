@@ -169,9 +169,16 @@ exports.addClassAdmin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const existingAdmin = await classadmins.findOne({ email });
+    const existingAdmin = await classadmins.findOne({ batch: year, classForm });
     if (existingAdmin) {
-      return res.status(406).json("Admin already exists");
+      return res
+        .status(406)
+        .json("An admin already exists for this batch and class.");
+    }
+
+    const emailExists = await classadmins.findOne({ email });
+    if (emailExists) {
+      return res.status(406).json("Admin with this email already exists.");
     }
 
     const newAdmin = new classadmins({
@@ -184,11 +191,12 @@ exports.addClassAdmin = async (req, res) => {
 
     await newAdmin.save();
 
-    res.status(200).json("Admin added successfully");
+    res.status(200).json("Admin added successfully.");
   } catch (err) {
+    console.error("Error adding admin:", err);
     res
       .status(500)
-      .json({ error: "Unable to add admin due to " + err.message });
+      .json({ error: "Unable to add admin due to: " + err.message });
   }
 };
 
@@ -287,8 +295,9 @@ exports.addBatch = async (req, res) => {
 
 exports.listBatch = async (req, res) => {
   try {
-    const batch = await batches.find({}).sort({ year: 1 });
+    const batch = await batches.find({});
 
+    batch.sort((a, b) => Number(a.year) - Number(b.year));
     return res.status(200).json(batch);
   } catch (error) {
     res
@@ -306,15 +315,24 @@ exports.listBatchClass = async (req, res) => {
       return res.status(400).json({ error: "Year parameter is required" });
     }
 
-    const classList = await classes
-      .find({ batch: year })
-      .populate("batch");
+    const classList = await classes.find({ batch: year }).populate("batch");
 
     if (classList.length === 0) {
       return res.status(404).json({ error: "No classes found for this batch" });
     }
 
-    classList.sort((a, b) => Number(a.classForm) - Number(b.classForm));
+    classList.sort((a, b) => {
+      const parseClassName = (name) => {
+        const match = name.match(/^(\d+)\s*([a-zA-Z]*)$/);
+        return match ? [parseInt(match[1]), match[2].toLowerCase()] : [0, ""];
+      };
+
+      const [numA, letterA] = parseClassName(a.classForm);
+      const [numB, letterB] = parseClassName(b.classForm);
+
+      if (numA !== numB) return numA - numB;
+      return letterA.localeCompare(letterB);
+    });
 
     res.status(200).json(classList);
   } catch (error) {
@@ -355,10 +373,22 @@ exports.addClass = async (req, res) => {
 
 exports.listClass = async (req, res) => {
   try {
-    const classForm = await classes
-      .find({})
-      .sort({ classForm: 1 })
-      .populate("batch");
+    const classForm = await classes.find({}).populate("batch");
+
+    classForm.sort((a, b) => {
+      const matchA = a.classForm.match(/^(\d+)(\D*)$/);
+      const matchB = b.classForm.match(/^(\d+)(\D*)$/);
+
+      const numA = parseInt(matchA[1], 10);
+      const numB = parseInt(matchB[1], 10);
+
+      if (numA !== numB) return numA - numB;
+
+      const letterA = matchA[2].toLowerCase();
+      const letterB = matchB[2].toLowerCase();
+
+      return letterA.localeCompare(letterB);
+    });
 
     return res.status(200).json(classForm);
   } catch (error) {
@@ -370,7 +400,10 @@ exports.listClass = async (req, res) => {
 
 exports.listStudent = async (req, res) => {
   try {
-    const student = await students.find({}).sort({ name: 1 });
+    const student = await students
+      .find({})
+      .collation({ locale: "en", strength: 1 })
+      .sort({ name: 1 });
 
     return res.status(200).json(student);
   } catch (error) {
@@ -400,6 +433,13 @@ exports.addStudent = async (req, res) => {
     const batch = await batches.findOne({ _id: year });
     const cls = await classes.findOne({ _id: classForm });
 
+    if (email) {
+      const existingStudent = await students.findOne({ email });
+      if (existingStudent) {
+        return res.status(400).json({ error: "Email already registered" });
+      }
+    }
+
     const newStudent = new students({
       name: name,
       batch: batch._id,
@@ -422,14 +462,17 @@ exports.addStudent = async (req, res) => {
     console.error("Error adding Student:", error);
     res
       .status(500)
-      .json({ error: "Unable to add Student due to " + error.message });
+      .json({ error: "Please fill name and gender fields before submitting" });
   }
 };
 
 exports.listStaff = async (req, res) => {
   console.log("Inside adminController: list staff function");
   try {
-    const staff = await staffs.find({}).sort({ name: 1 });
+    const staff = await staffs
+      .find({})
+      .collation({ locale: "en", strength: 1 })
+      .sort({ name: 1 });
 
     return res.status(200).json(staff);
   } catch (error) {
@@ -463,7 +506,10 @@ exports.addStaff = async (req, res) => {
 
 exports.listSponsor = async (req, res) => {
   try {
-    const sponsor = await sponsors.find({}).sort({ name: 1 });
+    const sponsor = await sponsors
+      .find({})
+      .collation({ locale: "en", strength: 1 })
+      .sort({ name: 1 });
 
     return res.status(200).json(sponsor);
   } catch (error) {
@@ -505,6 +551,7 @@ exports.listClassStudent = async (req, res) => {
 
     const studentList = await students
       .find({ batch: year, classForm: classForm })
+      .collation({ locale: "en", strength: 1 })
       .sort({ name: 1 })
       .populate("batch")
       .populate("classForm");
@@ -513,7 +560,31 @@ exports.listClassStudent = async (req, res) => {
       return res.status(200).json([]);
     }
 
-    res.status(200).json(studentList);
+    const groupedStudents = {
+      male: [],
+      female: [],
+      other: [],
+    };
+
+    studentList.forEach((student) => {
+      if (student.gender === "male") {
+        groupedStudents.male.push(student);
+      } else if (student.gender === "female") {
+        groupedStudents.female.push(student);
+      } else {
+        groupedStudents.other.push(student);
+      }
+    });
+
+    const sortedGroupedStudents = [
+      ...groupedStudents.male,
+      ...groupedStudents.female,
+      ...groupedStudents.other,
+    ];
+
+    console.log(sortedGroupedStudents);
+
+    res.status(200).json(sortedGroupedStudents);
   } catch (error) {
     console.error("Error fetching students:", error);
     res.status(500).json({ error: "Error fetching students" });
@@ -522,7 +593,10 @@ exports.listClassStudent = async (req, res) => {
 
 exports.listJobs = async (req, res) => {
   try {
-    const job = await jobs.find({}).sort({ job: 1 });
+    const job = await jobs
+      .find({})
+      .collation({ locale: "en", strength: 1 })
+      .sort({ job: 1 });
 
     return res.status(200).json(job);
   } catch (error) {
@@ -610,7 +684,7 @@ exports.editJob = async (req, res) => {
     const jobId = req.params.jobId;
     const { job } = req.body;
 
-    const existingJob = await jobs.findOne({ job });
+    const existingJob = await jobs.find({ job });
     if (existingJob) {
       return res.status(406).json("Job already exists");
     }
@@ -647,20 +721,49 @@ exports.deleteClass = async (req, res) => {
   try {
     const classId = req.params.classId;
 
-    const deletedStudents = await students
-      .deleteMany({ classForm: classId })
-      .session(session);
-    const deletedClassAdmins = await classadmins
-      .deleteMany({ classForm: classId })
-      .session(session);
-    const deletedClass = await classes
-      .findByIdAndDelete(classId)
-      .session(session);
-
-    if (!deletedClass) {
+    const classToDelete = await classes.findById(classId).session(session);
+    if (!classToDelete) {
       await session.abortTransaction();
       return res.status(404).json({ message: "Class not found" });
     }
+
+    if (classToDelete.profileImage) {
+      const classImagePath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        classToDelete.profileImage
+      );
+      fs.unlink(classImagePath, (err) => {
+        if (err) {
+          console.error("Error deleting class image:", err);
+        }
+      });
+    }
+
+    const studentsToDelete = await students.find({ classForm: classId }).session(session);
+
+    studentsToDelete.forEach((student) => {
+      if (student.profileImage) {
+        const studentImagePath = path.join(
+          __dirname,
+          "..",
+          "uploads",
+          student.profileImage
+        );
+        fs.unlink(studentImagePath, (err) => {
+          if (err) {
+            console.error(`Error deleting image for student ${student._id}:`, err);
+          }
+        });
+      }
+    });
+
+    const deletedStudents = await students.deleteMany({ classForm: classId }).session(session);
+
+    const deletedClassAdmins = await classadmins.deleteMany({ classForm: classId }).session(session);
+
+    await classes.findByIdAndDelete(classId).session(session);
 
     await session.commitTransaction();
     session.endSession();
@@ -697,16 +800,20 @@ exports.editClass = async (req, res) => {
 
     let updateFields = {
       classForm: classForm,
-    }
+    };
 
     if (req.file) {
       updateFields.profileImage = req.file.filename;
     }
 
-    const updatedClass = await classes.findByIdAndUpdate(classId, updateFields, {
-      new: true,
-      runValidators: true,
-    });
+    const updatedClass = await classes.findByIdAndUpdate(
+      classId,
+      updateFields,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!updatedClass) {
       return res.status(404).json({ message: "Class not found" });
@@ -729,24 +836,51 @@ exports.deleteBatch = async (req, res) => {
 
   try {
     const batchId = req.params.batchId;
-    const deletedClasses = await classes
-      .deleteMany({ batch: batchId })
-      .session(session);
-    const deletedStudents = await students
-      .deleteMany({ batch: batchId })
-      .session(session);
-    const deletedBatchAdmins = await batchadmins
-      .deleteMany({ batch: batchId })
-      .session(session);
-    const deletedClassAdmins = await classadmins
-      .deleteMany({ batch: batchId })
-      .session(session);
-    const deletedBatch = await batches
-      .findByIdAndDelete(batchId)
-      .session(session);
+
+    const classesToDelete = await classes.find({ batch: batchId }).session(session);
+    const studentsToDelete = await students.find({ batch: batchId }).session(session);
+
+    classesToDelete.forEach((classItem) => {
+      if (classItem.profileImage) {
+        const classImagePath = path.join(
+          __dirname,
+          "..",
+          "uploads",
+          classItem.profileImage
+        );
+        fs.unlink(classImagePath, (err) => {
+          if (err) {
+            console.error(`Error deleting class image ${classItem._id}:`, err);
+          }
+        });
+      }
+    });
+
+    studentsToDelete.forEach((student) => {
+      if (student.profileImage) {
+        const studentImagePath = path.join(
+          __dirname,
+          "..",
+          "uploads",
+          student.profileImage
+        );
+        fs.unlink(studentImagePath, (err) => {
+          if (err) {
+            console.error(`Error deleting student image ${student._id}:`, err);
+          }
+        });
+      }
+    });
+
+    const deletedClasses = await classes.deleteMany({ batch: batchId }).session(session);
+    const deletedStudents = await students.deleteMany({ batch: batchId }).session(session);
+    const deletedBatchAdmins = await batchadmins.deleteMany({ batch: batchId }).session(session);
+    const deletedClassAdmins = await classadmins.deleteMany({ batch: batchId }).session(session);
+    const deletedBatch = await batches.findByIdAndDelete(batchId).session(session);
 
     if (!deletedBatch) {
       await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: "Batch not found" });
     }
 
@@ -853,14 +987,12 @@ exports.deleteStudent = async (req, res) => {
   try {
     const studentId = req.params.studentId;
 
-    // Find student before deleting
     const student = await students.findById(studentId);
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    // Delete profile image if exists
     if (student.profileImage) {
       const imagePath = path.join(
         __dirname,
@@ -875,7 +1007,6 @@ exports.deleteStudent = async (req, res) => {
       });
     }
 
-    // Delete student from database
     await students.findByIdAndDelete(studentId);
 
     res.status(200).json({ message: "Student deleted successfully" });
@@ -958,14 +1089,12 @@ exports.deleteStaff = async (req, res) => {
   try {
     const staffId = req.params.staffId;
 
-    // Find staff before deleting
     const staff = await staffs.findById(staffId);
 
     if (!staff) {
       return res.status(404).json({ message: "Staff not found" });
     }
 
-    // Delete profile image if exists
     if (staff.profileImage) {
       const imagePath = path.join(
         __dirname,
@@ -980,7 +1109,6 @@ exports.deleteStaff = async (req, res) => {
       });
     }
 
-    // Delete staff from database
     await staffs.findByIdAndDelete(staffId);
 
     res.status(200).json({ message: "Staff deleted successfully" });
@@ -1131,14 +1259,12 @@ exports.deleteSponsor = async (req, res) => {
   try {
     const sponsorId = req.params.sponsorId;
 
-    // Find student before deleting
     const sponsor = await sponsors.findById(sponsorId);
 
     if (!sponsor) {
       return res.status(404).json({ message: "Sponsor not found" });
     }
 
-    // Delete profile image if exists
     if (sponsor.profileImage) {
       const imagePath = path.join(
         __dirname,
@@ -1153,7 +1279,6 @@ exports.deleteSponsor = async (req, res) => {
       });
     }
 
-    // Delete student from database
     await sponsors.findByIdAndDelete(sponsorId);
 
     res.status(200).json({ message: "Sponsor deleted successfully" });
@@ -1339,7 +1464,7 @@ exports.editUpdate = async (req, res) => {
       occupation,
       maskNumber,
     } = req.body;
-    
+
     if (!name || !gender) {
       return res.status(400).json({ message: "Name and gender are required" });
     }
@@ -1356,9 +1481,9 @@ exports.editUpdate = async (req, res) => {
       gender,
       occupation: occupation ? occupation.trim() : "",
       maskNumber: maskNumber,
-      batch: batch, 
+      batch: batch,
       classForm: classForm,
-    };    
+    };
 
     if (req.file) {
       updateFields.profileImage = req.file.filename;
@@ -1367,7 +1492,7 @@ exports.editUpdate = async (req, res) => {
     let studentUpdated = await updates.findByIdAndUpdate(
       studentId,
       updateFields,
-      { new: true, runValidators: true } 
+      { new: true, runValidators: true }
     );
 
     if (!studentUpdated) {

@@ -55,7 +55,7 @@ function EditStudent({ studentData, refreshStudentList, batchMap, classMap }) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",
-        text: "Please fill out all fields before submitting.",
+        text: "Please fill name and gender fields before submitting.",
       });
       return;
     }
@@ -165,12 +165,14 @@ function EditStudent({ studentData, refreshStudentList, batchMap, classMap }) {
                     type="text"
                     placeholder="Enter name"
                     value={studentDetails.name}
+
                     onChange={(e) =>
                       setStudentDetails({
                         ...studentDetails,
                         name: e.target.value,
                       })
                     }
+                    required
                   />
                 </Form.Group>
               </div>

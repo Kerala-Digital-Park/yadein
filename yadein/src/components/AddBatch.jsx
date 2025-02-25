@@ -25,7 +25,7 @@ function AddBatch({ refreshBatchList }) {
 
     const { year } = batchDetails;
 
-    if (!year) {
+    if (!year || !year.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",
@@ -33,8 +33,9 @@ function AddBatch({ refreshBatchList }) {
       });
       return;
     }
+  
     try {
-      const reqBody = { year };
+      const reqBody = { year: year.trim() };
 
       const result = await axios.post(`${baseURL}/admin/add-batch`, reqBody);
 

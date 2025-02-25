@@ -25,7 +25,7 @@ function AddJobs({ refreshJobList }) {
 
     const { job } = jobDetails;
 
-    if (!jobDetails.job) {
+    if (!jobDetails.job.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",

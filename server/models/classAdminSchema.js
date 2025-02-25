@@ -2,15 +2,15 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const ClassAdminSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  adminType: {
-    type: String,
-    enum: ["superadmin", "batchadmin", "classadmin"],
-    required: true,
-  },
-  batch: { type: String, required: true, unique: true },
-  classForm: { type: String, required: true },
-  password: { type: String, required: true },
+    email:{type: String, required: true, unique:true},
+    adminType:{
+        type: String,
+        enum:["superadmin", "batchadmin", "classadmin"],
+        required: true,
+    },
+    batch: {type: String, required: true},
+    classForm: {type: String, required: true},
+    password: {type: String, required: true},
 });
 
 ClassAdminSchema.pre("save", async function (next) {

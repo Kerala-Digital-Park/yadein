@@ -50,7 +50,13 @@ function BatchClasses() {
       if (result.isConfirmed) {
         try {
           await axios.delete(`${baseURL}/admin/class-delete/${classId}`);
-          fetchClasses();
+          
+          if (classes.length === 1) {
+            setClasses([]);
+          } else {
+            await fetchClasses();
+          }
+
           Swal.fire("Deleted!", "Class has been deleted.", "success");
         } catch (error) {
           console.error("Error deleting class:", error);
@@ -139,7 +145,7 @@ function BatchClasses() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="3" className="text-center">
+                        <td colSpan="4" className="text-center">
                           No classes found.
                         </td>
                       </tr>

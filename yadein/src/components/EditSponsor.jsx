@@ -39,7 +39,7 @@ function EditSponsor({ sponsorData, refreshSponsorList }) {
   const handleEdit = async (e) => {
     e.preventDefault();
 
-    if (!sponsorDetails.name) {
+    if (!sponsorDetails.name.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",

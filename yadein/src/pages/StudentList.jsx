@@ -5,11 +5,15 @@ import axios from "axios";
 import EditStudent from "../components/EditStudent";
 import useFetchMappings from "../components/useFetchMappings";
 import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 const baseURL = process.env.REACT_APP_API_URL;
 
 function StudentList() {
   const [students, setStudents] = useState([]);
+  const [batches, setBatches] = useState([]);
+  const [classes, setClasses] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState("all");
   const [selectedClass, setSelectedClass] = useState("all");
   const [selectedOccupation, setSelectedOccupation] = useState("all");
@@ -20,6 +24,39 @@ function StudentList() {
       setStudents(response.data);
     } catch (error) {
       console.error("Error fetching students:", error);
+    }
+  };
+
+  const fetchJobs = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/admin/job-list`);
+      setJobs(response.data);
+    } catch (error) {
+      console.error("Error fetching job list:", error);
+    }
+  };
+
+  const fetchClasses = async () => {
+    try {
+      const response = await axios.get(
+        `${baseURL}/admin/batch-class-list?year=${selectedBatch}`
+      );
+      if (selectedBatch === "all") {
+        setClasses([]);
+      } else {
+        setClasses([...new Set(response.data)]);
+      }
+    } catch (error) {
+      console.error("Error fetching class list:", error);
+    }
+  };
+
+  const fetchBatches = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/admin/batch-list`);
+      setBatches(response.data);
+    } catch (error) {
+      console.error("Error fetching batch list:", error);
     }
   };
 
@@ -52,27 +89,28 @@ function StudentList() {
 
   useEffect(() => {
     listStudents();
+    fetchBatches();
+    fetchJobs();
   }, []);
 
-  const { classMap, batchMap } = useFetchMappings(students);
+  useEffect(() => {
+    fetchClasses();
+  }, [students, selectedBatch]);
 
-  const uniqueBatches = [...new Set(students.map((s) => s.batch))];
-  const uniqueClasses = [...new Set(students.map((s) => s.classForm))];
-  const uniqueOccupations = [
-    "Unspecified",
-    ...new Set(students.map((s) => s.occupation).filter((o) => o)),
-  ];
+  const { classMap, batchMap } = useFetchMappings(students);
 
   const filteredStudents = students.filter((student) => {
     const batchMatch =
       selectedBatch === "all" || student.batch === selectedBatch;
+
     const classMatch =
       selectedClass === "all" || student.classForm === selectedClass;
+
     const occupationMatch =
       selectedOccupation === "all" ||
       (selectedOccupation === "Unspecified" && !student.occupation) ||
       student.occupation === selectedOccupation;
-      
+
     return batchMatch && classMatch && occupationMatch;
   });
 
@@ -95,12 +133,12 @@ function StudentList() {
                   <Form.Select
                     value={selectedBatch}
                     onChange={(e) => setSelectedBatch(e.target.value)}
-                    className="ms-3"
+                    className="ms-3 mt-3"
                   >
                     <option value="all">All Batches</option>
-                    {uniqueBatches.map((batch, index) => (
-                      <option key={index} value={batch}>
-                        {batchMap[batch] || batch}
+                    {batches.map((batch) => (
+                      <option key={batch._id} value={batch._id}>
+                        {batch.year}
                       </option>
                     ))}
                   </Form.Select>
@@ -116,9 +154,9 @@ function StudentList() {
                     className="ms-3 mt-3"
                   >
                     <option value="all">All Classes</option>
-                    {uniqueClasses.map((cls, index) => (
-                      <option key={index} value={cls}>
-                        {classMap[cls] || cls}
+                    {classes.map((cls) => (
+                      <option key={cls._id} value={cls._id}>
+                        {cls.classForm}
                       </option>
                     ))}
                   </Form.Select>
@@ -134,9 +172,10 @@ function StudentList() {
                     className="ms-3 mt-3"
                   >
                     <option value="all">All Occupations</option>
-                    {uniqueOccupations.map((occupation, index) => (
-                      <option key={index} value={occupation}>
-                        {occupation}
+                    <option value="Unspecified">Unspecified</option>
+                    {jobs.map((job) => (
+                      <option key={job._id} value={job.job}>
+                        {job.job}
                       </option>
                     ))}
                   </Form.Select>
@@ -179,8 +218,26 @@ function StudentList() {
                         <td className="align-middle">{student.contact}</td>
                         <td className="align-middle">{student.whatsapp}</td>
                         <td className="align-middle">{student.gender}</td>
-                        <td className="align-middle">{student.facebook}</td>
-                        <td className="align-middle">{student.instagram}</td>
+                        <td className="align-middle text-center ">
+                          {student.facebook && (
+                            <Link to={student.facebook} target="_blank">
+                              <i
+                                className="fa-brands fa-facebook"
+                                style={{ fontSize: "25px" }}
+                              ></i>
+                            </Link>
+                          )}
+                        </td>
+                        <td className="text-center align-middle">
+                          {student.instagram && (
+                            <Link to={student.instagram} target="_blank">
+                              <i
+                                className="fa-brands fa-instagram"
+                                style={{ color: "#e1306c", fontSize: "25px" }}
+                              ></i>
+                            </Link>
+                          )}
+                        </td>
                         <td className="align-middle">{student.occupation}</td>
 
                         <td className="align-middle">

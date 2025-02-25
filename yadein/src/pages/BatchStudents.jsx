@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import AddStudent from "../components/AddStudent";
 import { Button, Table, Container, Row, Col } from "react-bootstrap";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import AddAdmin from "../components/AddAdmin";
 import EditStudent from "../components/EditStudent";
 import Swal from "sweetalert2";
@@ -13,7 +13,7 @@ const baseURL = process.env.REACT_APP_API_URL;
 function BatchStudents() {
   const adminType = sessionStorage.getItem("adminType");
   const { year, classForm } = useParams();
-  
+
   const [students, setStudents] = useState([]);
   const [classFormName, setClassFormName] = useState("");
   const [batch, setBatch] = useState("");
@@ -26,7 +26,7 @@ function BatchStudents() {
       setStudents([...response.data]);
     } catch (error) {
       console.error("Error listing students:", error.response?.data || error);
-      setStudents([]); 
+      setStudents([]);
     }
   };
 
@@ -86,7 +86,10 @@ function BatchStudents() {
   return (
     <>
       <Header />
-      <div className="d-flex flex-column flex-lg-row" style={{minHeight:"800px"}}>
+      <div
+        className="d-flex flex-column flex-lg-row"
+        style={{ minHeight: "800px" }}
+      >
         <div className="content w-100 p-3">
           <Container>
             <Row className="mb-3">
@@ -132,8 +135,26 @@ function BatchStudents() {
                           <td className="align-middle">{student.contact}</td>
                           <td className="align-middle">{student.whatsapp}</td>
                           <td className="align-middle">{student.gender}</td>
-                          <td className="align-middle">{student.facebook}</td>
-                          <td className="align-middle">{student.instagram}</td>
+                          <td className="align-middle text-center ">
+                            {student.facebook && (
+                              <Link to={student.facebook} target="_blank">
+                                <i
+                                  className="fa-brands fa-facebook"
+                                  style={{ fontSize: "25px" }}
+                                ></i>
+                              </Link>
+                            )}
+                          </td>
+                          <td className="text-center align-middle">
+                            {student.instagram && (
+                              <Link to={student.instagram} target="_blank">
+                                <i
+                                  className="fa-brands fa-instagram"
+                                  style={{ color: "#e1306c", fontSize: "25px" }}
+                                ></i>
+                              </Link>
+                            )}
+                          </td>
                           <td className="align-middle">{student.occupation}</td>
                           <td className="align-middle">
                             {student.profileImage && (

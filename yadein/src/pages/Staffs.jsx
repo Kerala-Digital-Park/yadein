@@ -3,7 +3,7 @@ import UserNav from "../components/UserNav";
 import { Col, Row, Button, Card, Form } from "react-bootstrap";
 import axios from "axios";
 import profile from "../assets/profile.jpg";
-import img from "../assets/class.png"
+import img from "../assets/class.png";
 
 const baseURL = process.env.REACT_APP_API_URL;
 
@@ -56,22 +56,31 @@ function Staffs() {
   return (
     <>
       <style>
-        {`
-      .dropdown-toggle{
-      
-      }
+        {`     
+@media (max-width: 768px) {
+  .staff-card {
+    width: 9rem !important;  /* Adjust size for better fit */
+    height: 230px !important; /* Maintain consistent height */
+  }
+}
+
       `}
       </style>
       <UserNav />
       <div className="container-fluid w-75 rounded mb-5">
         <Row className="d-flex flex-column justify-content-center align-items-center mt-4">
-        <Col
+          <Col
             sm={12}
             md={6}
             lg={8}
             className="d-flex flex-column justify-content-center align-items-center"
           >
-            <img src={img} alt="" className="img-fluid" style={{width:"100%", borderBottom:"5px solid #b2d12e"}}/>
+            <img
+              src={img}
+              alt=""
+              className="img-fluid"
+              style={{ width: "100%", borderBottom: "5px solid #b2d12e" }}
+            />
           </Col>
         </Row>
         <Row className="d-flex flex-column justify-content-center align-items-center mt-4">
@@ -81,8 +90,11 @@ function Staffs() {
             lg={6}
             className="d-flex flex-column justify-content-center align-items-center"
           >
-            <h1>ജ്ഞാനത്തിന്റെ മാർഗദീപങ്ങൾ</h1>
-            <h2>The Guiding Lamps of <span style={{color:"#b2d12e"}}>Wisdom</span></h2>
+            <h1 className="text-center">ജ്ഞാനത്തിന്റെ മാർഗദീപങ്ങൾ</h1>
+            <h2 className="text-center">
+              The Guiding Lamps of{" "}
+              <span style={{ color: "#b2d12e" }}>Wisdom</span>
+            </h2>
           </Col>
         </Row>
 
@@ -118,7 +130,7 @@ function Staffs() {
         </Row>
 
         <Row className="search mb-3 d-flex align-items-center justify-content-center">
-          <Col s={6}  md={6} lg={6} className="d-flex gap-3 ">
+          <Col s={6} md={6} lg={6} className="d-flex gap-3 ">
             {key && staffNames.length > 0 && (
               <div className="dropdown w-100 d-flex ">
                 <button
@@ -151,7 +163,7 @@ function Staffs() {
                         backgroundColor: "#b2d12e",
                         border: "#b2d12e",
                         color: "black",
-                        width:"95%",
+                        width: "95%",
                         borderRadius: "5px",
                       }}
                     />
@@ -184,18 +196,26 @@ function Staffs() {
         </Row>
 
         <Row className="mt-5 d-flex align-items-center justify-content-center">
-          <Col className="d-flex gap-5 flex-wrap align-items-center justify-content-center">
-            {filteredStaff.length > 0 ? (
-              filteredStaff.map((staff) => (
+          {filteredStaff.length > 0 ? (
+            filteredStaff.map((staff) => (
+              <Col
+                key={staff._id}
+                xs={6}
+                sm={6}
+                md={4}
+                lg={2}
+                className="d-flex justify-content-center mb-4"
+              >
                 <Card
                   className="staff-card"
-                  key={staff._id}
-                  style={{ width: "10rem", height: "270px" }}
+                  style={{ width: "10rem" }}
                 >
                   <Card.Img
                     className="staff-img"
                     variant="top"
-                    style={{ height: "70%" }}
+                    style={{ height: "160px",
+                      width: "100%",
+                      objectFit: "cover",}}
                     src={
                       staff.profileImage
                         ? `${baseURL}/uploads/${staff.profileImage}`
@@ -203,17 +223,17 @@ function Staffs() {
                     }
                     alt={staff.name}
                   />
-                  <Card.Body>
-                    <Card.Title className="text-center">
+                  <Card.Body style={{height:"90px"}}>
+                    <Card.Title className="text-center" style={{fontSize:"16px"}}>
                       {staff.name}
                     </Card.Title>
                   </Card.Body>
                 </Card>
-              ))
-            ) : (
-              <p className="text-center">No staff </p>
-            )}
-          </Col>
+              </Col>
+            ))
+          ) : (
+            <p className="text-center">No staffs</p>
+          )}
         </Row>
       </div>
     </>

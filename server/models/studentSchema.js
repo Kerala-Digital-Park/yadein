@@ -16,7 +16,7 @@ const StudentSchema = new mongoose.Schema({
     enum: ["male", "female", "other"],
     required: true,
   },
-  occupation: { type: String, default: null },
+  occupation: { type: String },
   profileImage: { type: String },
   maskNumber: { type: Boolean, default: false }, 
 });

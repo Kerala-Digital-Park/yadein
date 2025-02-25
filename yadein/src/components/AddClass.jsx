@@ -43,7 +43,8 @@ function AddClass({ refreshClassList, year }) {
 
     const { classForm } = classDetails;
     const year = batches;
-    if (!classForm) {
+    
+    if (!classForm.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",
@@ -54,8 +55,7 @@ function AddClass({ refreshClassList, year }) {
     try {
       const formData = new FormData();
       formData.append("year", year);
-      formData.append("classForm", classForm);
-      // const reqBody = { year, classForm };
+      formData.append("classForm", classForm.trim());
       if (image) {
         formData.append("profileImage", image);
       }

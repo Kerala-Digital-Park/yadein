@@ -38,7 +38,7 @@ function EditClass({ classData, refreshClassList }) {
 
   const handleEdit = async (e) => {
     e.preventDefault();
-    if (!classDetails.classForm) {
+    if (!classDetails.classForm.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",

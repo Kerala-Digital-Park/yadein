@@ -10,6 +10,7 @@ const baseURL = process.env.REACT_APP_API_URL;
 function ClassList() {
   const [classForm, setClassForm] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState("all");
+  const [batches, setBatches] = useState([])
 
   const listClass = async () => {
     try {
@@ -17,6 +18,15 @@ function ClassList() {
       setClassForm(response.data);
     } catch (error) {
       console.error("Error fetching class list:", error);
+    }
+  };
+
+  const fetchBatches = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/admin/batch-list`);
+      setBatches(response.data);
+    } catch (error) {
+      console.error("Error fetching batch list:", error);
     }
   };
 
@@ -49,9 +59,8 @@ function ClassList() {
 
   useEffect(() => {
     listClass();
+    fetchBatches();
   }, []);
-
-  const uniqueBatches = [...new Set(classForm.map((cls) => cls.batch.year))];
 
   const filteredClasses =
     selectedBatch === "all"
@@ -79,10 +88,10 @@ function ClassList() {
                     onChange={(e) => setSelectedBatch(e.target.value)}
                     className="w-50 ms-4"
                   >
-                    <option value="all">All Batches</option>
-                    {uniqueBatches.map((batch, index) => (
-                      <option key={index} value={batch}>
-                        {batch}
+                     <option value="all">All Batches</option>
+                    {batches.map((batch) => (
+                      <option key={batch._id} value={batch.year}>
+                        {batch.year}
                       </option>
                     ))}
                   </Form.Select>

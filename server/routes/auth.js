@@ -12,7 +12,6 @@ router.post('/admin/add-batch-admin/:year',adminController.addBatchAdmin);
 router.post('/admin/add-class-admin/:year/:classForm',adminController.addClassAdmin);
 router.post('/admin/add-job',adminController.addJob);
 router.post('/admin/add-sponsor', upload.single("profileImage"),adminController.addSponsor);
-router.post('/admin/add-update', upload.single("profileImage"),adminController.addUpdate);
 router.post('/admin/add-student-update',adminController.addStudentUpdate);
 
 router.get('/admin/dashboard-stats', adminController.dashStats)

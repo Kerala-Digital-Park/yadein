@@ -4,6 +4,7 @@ import { Button, Table, Container, Row, Col } from "react-bootstrap";
 import axios from "axios";
 import useFetchMappings from "../components/useFetchMappings";
 import Swal from "sweetalert2";
+import { Link } from "react-router-dom";
 
 const baseURL = process.env.REACT_APP_API_URL;
 
@@ -47,10 +48,9 @@ function Updates() {
   };
 
   const handleAccept = async (student) => {
-    
     try {
       const studentData = {
-        studentId:student._id,
+        studentId: student._id,
         name: student.name,
         batch: student.batch,
         classForm: student.classForm,
@@ -65,7 +65,7 @@ function Updates() {
         maskNumber: student.maskNumber,
         profileImage: student.profileImage,
       };
-  
+
       const result = await axios.post(
         `${baseURL}/admin/add-student-update`,
         studentData,
@@ -73,15 +73,15 @@ function Updates() {
           headers: { "Content-Type": "application/json" },
         }
       );
-  
+
       if (result.status === 200) {
         Swal.fire({
           icon: "success",
           title: "Student Updated",
           text: "Student updated successfully!",
         });
-  
-        listUpdates(); 
+
+        listUpdates();
       }
     } catch (error) {
       Swal.fire({
@@ -92,8 +92,7 @@ function Updates() {
       console.error("Error adding student:", error);
     }
   };
-  
-  
+
   useEffect(() => {
     listUpdates();
   }, []);
@@ -103,7 +102,10 @@ function Updates() {
   return (
     <>
       <Header />
-      <div className="d-flex flex-column flex-lg-row" style={{minHeight:"800px"}}>
+      <div
+        className="d-flex flex-column flex-lg-row"
+        style={{ minHeight: "800px" }}
+      >
         <div className="content w-100 p-3">
           <Container>
             <Row className="mb-3">
@@ -147,8 +149,26 @@ function Updates() {
                         <td className="align-middle">{student.contact}</td>
                         <td className="align-middle">{student.whatsapp}</td>
                         <td className="align-middle">{student.gender}</td>
-                        <td className="align-middle">{student.facebook}</td>
-                        <td className="align-middle">{student.instagram}</td>
+                        <td className="align-middle text-center ">
+                          {student.facebook && (
+                            <Link to={student.facebook} target="_blank">
+                              <i
+                                className="fa-brands fa-facebook"
+                                style={{ fontSize: "25px" }}
+                              ></i>
+                            </Link>
+                          )}
+                        </td>
+                        <td className="text-center align-middle">
+                          {student.instagram && (
+                            <Link to={student.instagram} target="_blank">
+                              <i
+                                className="fa-brands fa-instagram"
+                                style={{ color: "#e1306c", fontSize: "25px" }}
+                              ></i>
+                            </Link>
+                          )}
+                        </td>
                         <td className="align-middle">{student.occupation}</td>
 
                         <td className="align-middle">
@@ -165,7 +185,7 @@ function Updates() {
 
                         <td className="align-middle">
                           <div className="d-flex align-items-center gap-2">
-                          <Button
+                            <Button
                               variant="success"
                               onClick={() => handleAccept(student)}
                             >

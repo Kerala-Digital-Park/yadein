@@ -57,73 +57,86 @@ function Batch() {
         {`
       @media (max-width: 768px) {
         .input{
-        width: 75%
+        width: 85%
         }
-      }
+        .batch-circle{
+        font-size:25px;
+        }
+        .batch-row{
+        gap:0 !important;
+        }
+        
       `}
       </style>
       <ToastContainer position="top-center" autoClose={3000} />
       <UserNav />
-      <div className="mb-5 mx-auto" style={{width:"80%"}}>
-      <Row className="d-flex justify-content-center align-items-center mt-3">
-        <Col
-          sm={12}
-          md={6}
-          lg={6}
-          className="d-flex justify-content-center align-items-center"
-        >
-          <img
-            src={img}
-            alt=""
-            className="img-fluid"
-            style={{ width: "100%", borderBottom: "5px solid #b2d12e" }}
-          />
-        </Col>
-      </Row>
-
-      <Row className="input d-flex justify-content-center mt-4 mx-auto">
-        <Col
-          sm={10}
-          md={4}
-          lg={3}
-          className="d-flex justify-content-center gap-3 mb-3"
-        >
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Enter your batch"
-            value={batchYear}
-            style={{ backgroundColor: "#BED174", color: "black" }}
-            onChange={(e) => setBatchYear(e.target.value)}
-          />
-          <Button
-            className="batch-button"
-            onClick={fetchBatchDetails}
-            style={{ backgroundColor: "#b2d12e", border: "#b2d12e" }}
+      <div className="mb-5 mx-auto" style={{ width: "80%" }}>
+        <Row className="d-flex justify-content-center align-items-center mt-3">
+          <Col
+            sm={12}
+            md={6}
+            lg={6}
+            className="d-flex justify-content-center align-items-center"
           >
-            Go
-          </Button>
-        </Col>
-      </Row>
-      <div className="container-fluid rounded">
-        <Row className="d-flex justify-content-center align-items-center gap-4 mt-4">
-          {batches.length > 0 ? (
-            batches.map((batch, index) => (
-              <div
-                key={index}
-                className="batch-circle"
-                onClick={() => navigate(`/batch/${batch._id}`)}
-              >
-                {batch.year}
-              </div>
-            ))
-          ) : (
-            <p className="text-center">Loading batches...</p>
-          )}
+            <img
+              src={img}
+              alt=""
+              className="img-fluid"
+              style={{ width: "100%", borderBottom: "5px solid #b2d12e" }}
+            />
+          </Col>
         </Row>
+
+        <Row className="input d-flex justify-content-center mt-4 mx-auto">
+          <Col
+            sm={10}
+            md={4}
+            lg={3}
+            className="d-flex justify-content-center gap-3 mb-3"
+          >
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter your batch"
+              value={batchYear}
+              style={{ backgroundColor: "#BED174", color: "black" }}
+              onChange={(e) => setBatchYear(e.target.value)}
+            />
+            <Button
+              className="batch-button"
+              onClick={fetchBatchDetails}
+              style={{ backgroundColor: "#b2d12e", border: "#b2d12e" }}
+            >
+              Go
+            </Button>
+          </Col>
+        </Row>
+        <div className="container-fluid rounded">
+          <Row className="d-flex justify-content-center align-items-center mt-4 gap-5 batch-row">
+            {batches.length > 0 ? (
+              batches.map((batch, index) => (
+                <Col
+                  key={index}
+                  xs={6}
+                  sm={4}
+                  md={3}
+                  lg={1}
+                  className="d-flex justify-content-center mb-3"
+                >
+                  <div
+                    className="batch-circle"
+                    onClick={() => navigate(`/batch/${batch._id}`)}
+                  >
+                    {batch.year}
+                  </div>
+                </Col>
+              ))
+            ) : (
+              <p className="text-center">No batches...</p>
+            )}
+          </Row>
+        </div>
       </div>
-      </div>
-      
     </>
   );
 }

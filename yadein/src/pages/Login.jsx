@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button, Form, Container, Card } from "react-bootstrap";
-import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 import UserNav from "../components/UserNav";
 import { toast } from "react-toastify";
@@ -68,9 +67,9 @@ function StudentAuth() {
 
     if (
       !isLogin &&
-      (!studentDetails.name ||
-        !studentDetails.year ||
-        !studentDetails.classForm ||
+      (!studentDetails.name.trim() ||
+        !studentDetails.year.trim() ||
+        !studentDetails.classForm.trim() ||
         !studentDetails.gender)
     ) {
       toast.warn("Please fill in all fields!");

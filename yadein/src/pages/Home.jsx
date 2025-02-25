@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import text from "../assets/home-text.png";
 import goto from "../assets/goto.png";
+import profile from "../assets/profile.jpg";
 
 const baseURL = process.env.REACT_APP_API_URL;
 
@@ -277,7 +278,7 @@ height: 400px;
 
 @media (max-width: 768px) {
     .input{
-      width: 75%
+      width: 85%
     }
 
     .carousel-inner {
@@ -431,33 +432,36 @@ height: 400px;
                     </div>
                   ))
                 ) : (
-                  <p className="text-center">Loading batches...</p>
+                  <p className="text-center">No batches available</p>
                 )}
               </div>
+              {batches.length > 1 && (
+                <>
+                  <button
+                    className="carousel-control-batch-prev"
+                    type="button"
+                    onClick={handleBatchPrev}
+                  >
+                    <span
+                      className="carousel-control-prev-icon"
+                      aria-hidden="true"
+                    ></span>
+                    <span className="visually-hidden">Previous</span>
+                  </button>
 
-              <button
-                className="carousel-control-batch-prev"
-                type="button"
-                onClick={handleBatchPrev}
-              >
-                <span
-                  className="carousel-control-prev-icon"
-                  aria-hidden="true"
-                ></span>
-                <span className="visually-hidden">Previous</span>
-              </button>
-
-              <button
-                className="carousel-control-batch-next"
-                type="button"
-                onClick={handleBatchNext}
-              >
-                <span
-                  className="carousel-control-next-icon"
-                  aria-hidden="true"
-                ></span>
-                <span className="visually-hidden">Next</span>
-              </button>
+                  <button
+                    className="carousel-control-batch-next"
+                    type="button"
+                    onClick={handleBatchNext}
+                  >
+                    <span
+                      className="carousel-control-next-icon"
+                      aria-hidden="true"
+                    ></span>
+                    <span className="visually-hidden">Next</span>
+                  </button>
+                </>
+              )}
             </div>
           </Row>
 
@@ -570,7 +574,11 @@ height: 400px;
                           >
                             <Card.Img
                               variant="top"
-                              src={`${baseURL}/uploads/${sponsor.profileImage}`}
+                              src={
+                                sponsor.profileImage
+                                  ? `${baseURL}/uploads/${sponsor.profileImage}`
+                                  : profile
+                              }
                               height={"200px"}
                               className="mt-5"
                             />
@@ -621,6 +629,5 @@ height: 400px;
     </>
   );
 }
-// BFD168     BED174        b2d12e      C2D18A    00AB66
 
 export default Home;

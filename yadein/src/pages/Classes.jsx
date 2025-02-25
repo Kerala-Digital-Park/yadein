@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import animation from "../assets/animation.mp4";
+import blank from "../assets/blank.jpg";
 
 const baseURL = process.env.REACT_APP_API_URL;
 
@@ -22,6 +23,7 @@ function Classes() {
   const [batch, setBatch] = useState("");
   const navigate = useNavigate();
   const [batchYear, setBatchYear] = useState("");
+  const userId = sessionStorage.getItem("userId");
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -48,10 +50,10 @@ function Classes() {
       const response = await axios.get(
         `${baseURL}/admin/class-student-list?year=${year}&classForm=${classId}`
       );
-      setStudents([...response.data]);
+      setStudents(response.data);
     } catch (error) {
       console.error("Error listing students:", error.response?.data || error);
-      setStudents([]);
+      setStudents({ male: [], female: [], other: [] });
     }
   };
 
@@ -234,7 +236,7 @@ function Classes() {
       </style>
       <ToastContainer position="top-center" autoClose={3000} />
 
-      <div className="container-fluid w-75 rounded mb-5">
+      <div className="container-fluid rounded mb-5" style={{ width: "85%" }}>
         <div className="video-container">
           <video
             autoPlay
@@ -288,12 +290,18 @@ function Classes() {
           </Col>
         </Row>
 
-        <Row className="mt-3">
-          <Col className="d-flex gap-3 flex-wrap justify-content-center">
-            {classes.length > 0 ? (
-              classes.map((cls) => (
+        <Row className="mt-3 g-3 justify-content-center">
+          {classes.length > 0 ? (
+            classes.map((cls) => (
+              <Col
+                key={cls._id}
+                xs={6}
+                sm={6}
+                md={4}
+                lg={2}
+                className="d-flex justify-content-center"
+              >
                 <Button
-                  key={cls._id}
                   onClick={() => {
                     fetchStudents(cls._id);
                     setSelectedClass(cls._id);
@@ -311,11 +319,13 @@ function Classes() {
                 >
                   Class {cls.classForm}
                 </Button>
-              ))
-            ) : (
+              </Col>
+            ))
+          ) : (
+            <Col>
               <p className="text-center">No classes</p>
-            )}
-          </Col>
+            </Col>
+          )}
         </Row>
 
         <Row className="d-flex justify-content-center align-items-center p-5">
@@ -383,88 +393,130 @@ function Classes() {
           </Col>
         </Row>
 
-        <Row className="mt-5 d-flex align-items-center justify-content-center ">
-          <Col>
-            <div className="d-flex flex-wrap gap-5 justify-content-center">
-              {students.length > 0 ? (
-                students.map((student) => (
-                  <Card
-                    className="student-card"
-                    key={student._id}
-                    style={{ width: "160px", height: "200px" }}
-                  >
-                    <Card.Img
-                      className="student-img"
-                      variant="top"
-                      style={{
-                        height: "160px",
-                        width: "100%",
-                        objectFit: "cover",
-                      }}
-                      src={
-                        student.profileImage
-                          ? `${baseURL}/uploads/${student.profileImage}`
-                          : profile
-                      }
-                      alt={student.name}
-                    />
+        <Row className="mt-5 justify-content-center g-2">
+          {students.length > 0 ? (
+            students.map((student) => (
+              <Col
+                key={student._id}
+                xs={6}
+                sm={6}
+                md={4}
+                lg={2}
+                className="d-flex justify-content-center"
+              >
+                <Card
+                  className="student-card"
+                  style={{ width: "160px", marginBottom: "15px" }}
+                >
+                  <Card.Img
+                    className="student-img"
+                    variant="top"
+                    style={{
+                      height: "160px",
+                      width: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={
+                      student.profileImage
+                        ? `${baseURL}/uploads/${student.profileImage}`
+                        : profile
+                    }
+                    alt={student.name}
+                  />
 
-                    <div
-                      className="card-hover"
-                      style={{
-                        position: "absolute",
-                        color: "#fff",
-                        top: "0",
-                        height: "160px",
-                        width: "100%",
-                        opacity: "0.9",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        paddingBottom: "10px" /* Adds spacing */,
-                      }}
-                    >
-                      <Link to={"/profile"} className="add">
-                        Add/Edit
-                      </Link>
-                      <Link to={"/profile"}>
-                        <i className="fa-solid fa-plus add-icon ms-2"></i>
-                      </Link>
-                      {/* <div className="social d-flex justify-content-center gap-2 w-100 align-items-center" style={{ minHeight: "40px", marginBottom:"10px" }}> */}
-                      <div>
-                        {student.whatsapp && student.maskNumber === false && (
-                          <Link
-                            to={`https://api.whatsapp.com/send/?phone=${student.whatsapp}`}
-                            target="_blank"
-                          >
-                            <i className="fa-brands fa-whatsapp whatsapp-icon"></i>
-                          </Link>
-                        )}
-                        {student.facebook && (
-                          <Link to={student.facebook} target="_blank">
-                            <i className="fa-brands fa-facebook fb-icon"></i>
-                          </Link>
-                        )}
-                        {student.instagram && (
-                          <Link to={student.instagram} target="_blank">
-                            <i className="fa-brands fa-instagram insta-icon"></i>
-                          </Link>
-                        )}
-                      </div>
+                  <div
+                    className="card-hover"
+                    style={{
+                      position: "absolute",
+                      color: "#fff",
+                      top: "0",
+                      height: "160px",
+                      width: "100%",
+                      opacity: "0.9",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      paddingBottom: "10px",
+                    }}
+                  >
+                    <Link to={"/profile"} className="add">
+                      Add/Edit
+                    </Link>
+                    <Link to={"/profile"}>
+                      <i className="fa-solid fa-plus add-icon ms-2"></i>
+                    </Link>
+                    <div>
+                      {student.whatsapp && student.maskNumber === false && (
+                        <Link
+                          to={`https://api.whatsapp.com/send/?phone=${student.whatsapp}`}
+                          target="_blank"
+                        >
+                          <i className="fa-brands fa-whatsapp whatsapp-icon"></i>
+                        </Link>
+                      )}
+                      {student.facebook && (
+                        <Link to={student.facebook} target="_blank">
+                          <i className="fa-brands fa-facebook fb-icon"></i>
+                        </Link>
+                      )}
+                      {student.instagram && (
+                        <Link to={student.instagram} target="_blank">
+                          <i className="fa-brands fa-instagram insta-icon"></i>
+                        </Link>
+                      )}
                     </div>
-                    <Card.Body style={{ height: "40px" }}>
-                      <Card.Title className="text-center">
-                        {student.name}
-                      </Card.Title>
-                    </Card.Body>
-                  </Card>
-                ))
-              ) : (
-                <p>No students</p>
-              )}
-            </div>
-          </Col>
+                  </div>
+                  <Card.Body style={{ height: "90px" }}>
+                    <Card.Title
+                      className="text-center"
+                      style={{ fontSize: "16px" }}
+                    >
+                      {student.name}
+                    </Card.Title>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))
+          ) : (
+            <p className="text-center">No students</p>
+          )}
+
+          {!userId && (
+            <Col
+              xs={6}
+              sm={6}
+              md={4}
+              lg={2}
+              className="d-flex justify-content-center"
+            >
+              <Card
+                className="student-card"
+                style={{
+                  width: "160px",
+                  marginBottom: "15px",
+                  cursor: "pointer",
+                }}
+                onClick={() => navigate("/login")}
+              >
+                <Card.Img
+                  className="student-img"
+                  variant="top"
+                  style={{ height: "160px", width: "100%", objectFit: "cover" }}
+                  src={blank}
+                  alt="Login"
+                />
+                <Card.Body style={{ height: "90px" }}>
+                  <Card.Title
+                    className="text-center"
+                    style={{ fontSize: "16px", color: "red" }}
+                  >
+                    Add Student
+                  </Card.Title>
+                </Card.Body>
+              </Card>
+            </Col>
+          )}
         </Row>
       </div>
     </>

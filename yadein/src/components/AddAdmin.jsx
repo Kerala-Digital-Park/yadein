@@ -124,7 +124,6 @@ function AddAdmin({ year, classForm }) {
     <>
       <div className="d-flex flex-column">
         <Button
-          // variant="primary"
           onClick={handleShow}
           className="me-5 mb-3"
           disabled={!!existingAdmin}
@@ -192,7 +191,7 @@ function AddAdmin({ year, classForm }) {
                     <Form.Label>Class Form</Form.Label>
                     <Form.Control
                       type="text"
-                      value={classFormName || "N/A"}
+                      value={classFormName}
                       disabled
                     />
                   </Form.Group>

@@ -67,8 +67,9 @@ function AddStudent({ refreshStudentList }) {
   };
 
   const handleAdd = async (e) => {
+    
     e.preventDefault();
-
+    
     if (
       !studentDetails.name ||
       !studentDetails.gender
@@ -76,28 +77,28 @@ function AddStudent({ refreshStudentList }) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",
-        text: "Please fill out all fields before submitting.",
+        text: "Please fill name and gender fields before submitting.",
       });
       return;
     }
-
+    
     const formData = new FormData();
-    formData.append("name", studentDetails.name);
+    formData.append("name", studentDetails.name.trim());
     formData.append("year", year);
     formData.append("classForm", classForm);
     formData.append("password", studentDetails.password);
-    formData.append("email", studentDetails.email);
-    formData.append("contact", studentDetails.contact);
-    formData.append("whatsapp", studentDetails.whatsapp);
-    formData.append("facebook", studentDetails.facebook);
-    formData.append("instagram", studentDetails.instagram);
+    formData.append("email", studentDetails.email?.trim() || "");
+    formData.append("contact", studentDetails.contact?studentDetails.contact : "");
+    formData.append("whatsapp", studentDetails.whatsapp? studentDetails.whatsapp: "");
+    formData.append("facebook", studentDetails.facebook?.trim() || "");
+    formData.append("instagram", studentDetails.instagram?.trim() || "");
     formData.append("gender", studentDetails.gender);
     formData.append("occupation", studentDetails.occupation);
-
+    
     if (image) {
       formData.append("profileImage", image);
     }
-
+    
     try {
       const result = await axios.post(
         `${baseURL}/admin/add-student`,
@@ -106,8 +107,9 @@ function AddStudent({ refreshStudentList }) {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-
+      
       if (result.status === 200) {
+        console.log("result",result.data);
         Swal.fire({
           icon: "success",
           title: "Student Added",
@@ -121,7 +123,7 @@ function AddStudent({ refreshStudentList }) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error.response?.data || "Something went wrong!",
+        text: error.response?.data?.error || "Something went wrong!",
       });
       console.error("Error adding student:", error);
     }

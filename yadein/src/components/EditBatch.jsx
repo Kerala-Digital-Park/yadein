@@ -34,15 +34,15 @@ function EditBatch({ batchData, refreshBatchList }) {
   const handleEdit = async (e) => {
     e.preventDefault();
 
-    if (!batchDetails.year) {
+    if (!batchDetails.year || !batchDetails.year.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",
-        text: "Please fill out all fields before submitting.",
+        text: "Please enter a batch!",
       });
       return;
     }
-
+  
     try {
       const result = await axios.put(
         `${baseURL}/admin/batch-edit/${batchData._id}`,

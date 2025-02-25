@@ -34,7 +34,7 @@ function EditStaff({ staffData, refreshStaffList }) {
   const handleEdit = async (e) => {
     e.preventDefault();
 
-    if (!staffs.name || !staffs.staffType) {
+    if (!staffs.name.trim() || !staffs.staffType) {
       Swal.fire({
         icon: "warning",
         title: "Incomplete Form",

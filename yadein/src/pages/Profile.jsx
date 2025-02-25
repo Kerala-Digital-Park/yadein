@@ -77,7 +77,7 @@ function Profile() {
   const handleAdd = async (e) => {
     e.preventDefault();
     if (
-      !studentDetails.name ||
+      !studentDetails.name.trim() ||
       !studentDetails.gender ||
       !studentDetails.classForm ||
       !studentDetails.batch
@@ -97,7 +97,7 @@ function Profile() {
       formData.append("facebook", studentDetails.facebook?.trim() || "");
       formData.append("instagram", studentDetails.instagram?.trim() || "");
       formData.append("gender", studentDetails.gender);
-      formData.append("occupation", studentDetails.occupation);
+      formData.append("occupation", studentDetails.occupation?studentDetails.occupation:"");
       formData.append("maskNumber", studentDetails.maskNumber);
       if (image) {
         formData.append("image", image || null);
@@ -113,7 +113,7 @@ function Profile() {
 
       if (result.status === 200) {
         toast.success(
-          "Profile updated successfully! Your changes are pending approval from the owner. We'll notify you once they're reviewed."
+          "Profile updated successfully! Your changes are pending approval from the owner."
         );
         fetchUser();
       }
@@ -136,7 +136,7 @@ function Profile() {
 
   return (
     <>
-      <ToastContainer position="top-center" autoClose={3000} />
+      <ToastContainer position="top-center" autoClose={5000} />
       <style>
         {`
 .form-check-input:checked {
@@ -148,7 +148,7 @@ function Profile() {
   background-color: #b2d12e !important;
   border: 1px solid #a2be2c; /* Optional: Adjust border color */
   color: #000; /* Optional: Set text color for contrast */
-  width:80%
+  width:80%;
 }
 
 .custom-input:focus {
@@ -167,10 +167,16 @@ option:hover {
   border: 1px solid black
   color: black;
 }
+
+@media (max-width: 768px) {
+  .custom-input {
+    width: 100%;  
+  }
+}
 `}
       </style>
       <UserNav />
-      <Container className="rounded mt-3 p-4 w-75">
+      <Container className="rounded mt-3 p-4 w-75 mx-auto">
         <Row className="d-flex align-items-center justify-content-center mx-auto">
           <Col
             sm={12}
@@ -186,10 +192,10 @@ option:hover {
             </h3>
           </Col>
         </Row>
-        <Row className="justify-content-center mt-3">
+        <Row className="d-flex justify-content-center mt-3" >
           <Col xs={12}>
             <Form onSubmit={handleAdd}>
-              <Row className="mb-3">
+              <Row className="mb-3 d-flex justify-content-center">
                 <Col xs={12} md={6}>
                   <Form.Group>
                     <Form.Label>Batch</Form.Label>

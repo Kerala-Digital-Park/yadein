@@ -54,6 +54,7 @@ function Footer() {
           backgroundColor: isAdmin ? "transparent" : "#355E3B",
           display: "block",
           overflow: "hidden",
+          lineHeight:"30px"
         }}
       >
         {!isAdmin && (
@@ -68,7 +69,7 @@ function Footer() {
               />
               <p>
                 Pullurampara P.O., Kozhikode, 673603 <br />
-                Phone: 04952276242 <br />
+                Phone: <a href="tel:04952276242" style={{ textDecoration: "none", color: "#b2d12e" }}>04952276242</a> <br />
                 Email:&nbsp;
                 <a
                   href="mailto:sjhspullurampara@gmail.com"

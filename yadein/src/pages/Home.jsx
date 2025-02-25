@@ -287,6 +287,7 @@ height: 400px;
         scroll-behavior: smooth;
         padding-left: 0px !important;
         justify-content: center;
+        gap:15px;
     }
 
     .batch-circle {
@@ -294,6 +295,7 @@ height: 400px;
         height: 100px !important;
         min-width: 100px !important;
         font-size: 25px !important;
+        margin-left:50px
     }
 
     .carousel-control-batch-prev,
@@ -348,6 +350,17 @@ height: 400px;
     bottom: 10px;      
   }
 }
+  @media(max-width:400px){
+  
+         .heading {
+    font-size: 1rem; 
+    bottom: 40px;   
+  }
+
+  .subheading {
+    font-size: 0.8rem; 
+    bottom: 10px;      
+  }}
       `}
       </style>
       <UserNav />

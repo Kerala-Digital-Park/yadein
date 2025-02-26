@@ -69,7 +69,7 @@ function Footer() {
               />
               <p>
                 Pullurampara P.O., Kozhikode, 673603 <br />
-                Phone: <a href="tel:04952276242" style={{ textDecoration: "none", color: "#b2d12e" }}>04952276242</a> <br />
+                Phone: <a href="tel:+918606605003" style={{ textDecoration: "none", color: "#b2d12e" }}>+91 86066 05003</a> <br />
                 Email:&nbsp;
                 <a
                   href="mailto:sjhspullurampara@gmail.com"
@@ -88,7 +88,7 @@ function Footer() {
             color: isAdmin ? "black" : "white",
           }}
         >
-          &copy; 2025 Yadein. All Rights Reserved.
+          &copy; 2025 Yaadein. All Rights Reserved.
         </p>
         <button
           onClick={scrollToTop}

@@ -13,20 +13,12 @@ const UpdateSchema = new mongoose.Schema({
   instagram: { type: String },
   gender: {
     type: String,
-    enum: ["male", "female", "other"],
+    enum: ["male", "female"],
     required: true,
   },
   occupation: { type: String },
   profileImage: { type: String },
   maskNumber: { type: Boolean, default: false }, 
 });
-
-// UpdateSchema.pre("save", async function (next) {
-//   if (this.password && this.isModified("password")) {
-//     const salt = await bcrypt.genSalt(10);
-//     this.password = await bcrypt.hash(this.password, salt);
-//   }
-//   next();
-// });
 
 module.exports = mongoose.model("updates", UpdateSchema);

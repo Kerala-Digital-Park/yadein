@@ -13,7 +13,7 @@ const StudentSchema = new mongoose.Schema({
   instagram: { type: String },
   gender: {
     type: String,
-    enum: ["male", "female", "other"],
+    enum: ["male", "female"],
     required: true,
   },
   occupation: { type: String },

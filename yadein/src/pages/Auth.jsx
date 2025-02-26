@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button, Form, Container, Card } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../assets/logoc.png";
+import logo from "../assets/logo.png";
 import Swal from "sweetalert2";
 
 const baseURL = process.env.REACT_APP_API_URL;
@@ -97,7 +97,7 @@ const AuthPage = () => {
           <img
             src={logo}
             alt="Logo"
-            style={{ height: "60px", width: "150px" }}
+            style={{ height: "60px", width: "160px" }}
           />
         </div>
         <h3 className="text-center fw-bold text-dark mb-4">Admin Login</h3>
@@ -161,7 +161,7 @@ const AuthPage = () => {
       <p className="text-center mt-5" style={{
         color: "black"
       }}>
-        &copy; 2025 Yadein. All Rights Reserved.
+        &copy; 2025 Yaadein. All Rights Reserved.
       </p>
     </Container>
   );

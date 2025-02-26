@@ -20,10 +20,10 @@ function Home() {
   const [batches, setBatches] = useState([]);
   const [batchYear, setBatchYear] = useState("");
   const batchCarouselRef = useRef(null);
-  const sponsorCarouselRef = useRef(null);
   const navigate = useNavigate();
   const [sponsors, setSponsors] = useState([]);
   const [animate, setAnimate] = useState("fadeIn");
+  const [activeItem, setActiveItem] = useState(0);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -61,22 +61,13 @@ function Home() {
     }
   };
 
-  const handleSponsorPrev = () => {
-    if (sponsorCarouselRef.current) {
-      sponsorCarouselRef.current.scrollBy({ left: -200, behavior: "smooth" });
-    }
-  };
+  const [showAllSponsors, setShowAllSponsors] = useState(false);
 
-  const handleSponsorNext = () => {
-    if (sponsorCarouselRef.current) {
-      sponsorCarouselRef.current.scrollBy({ left: 200, behavior: "smooth" });
-    }
-  };
+  const visibleSponsors = showAllSponsors ? sponsors : sponsors.slice(0, 3);
 
   useEffect(() => {
     const interval = setInterval(() => {
       handleBatchNext();
-      handleSponsorNext();
     }, 2000);
 
     return () => clearInterval(interval);
@@ -113,19 +104,32 @@ function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveItem((prev) => (prev === 0 ? 1 : 0));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <ToastContainer position="top-center" autoClose={3000} />
 
       <style>
         {`
+         .container-fluid{
+    width:80%
+    }
+    
       .carousel-inner {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding-left: 10px;
+    // padding-left: 10px;
+    // gap:35px;
 }
 
 .carousel-inner::-webkit-scrollbar {
@@ -185,6 +189,31 @@ function Home() {
     filter: invert(1);
 }
 
+.visit{
+ font-size: 30px;
+  font-weight: 600
+}
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade Out Animation */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slide In from Left */
 @keyframes fadeInLeft {
   from {
     opacity: 0;
@@ -196,6 +225,7 @@ function Home() {
   }
 }
 
+/* Slide In from Right */
 @keyframes fadeInRight {
   from {
     opacity: 0;
@@ -207,17 +237,19 @@ function Home() {
   }
 }
 
+/* Slide Out to Left */
 @keyframes fadeOutLeft {
   from {
     opacity: 1;
     transform: translateX(0);
   }
   to {
-    opacity: 0;
+    opacity:0;
     transform: translateX(-50px);
   }
 }
 
+/* Slide Out to Right */
 @keyframes fadeOutRight {
   from {
     opacity: 1;
@@ -229,20 +261,29 @@ function Home() {
   }
 }
 
+/* Apply the animations */
+.fadeIn {
+  animation: fadeIn 1s linear forwards;
+}
+
+.fadeOut {
+  animation: fadeOut 1s linear forwards;
+}
+
 .fadeInLeft {
-  animation: fadeInLeft 1s ease-in-out forwards;
+  animation: fadeInLeft 1s linear forwards;
 }
 
 .fadeInRight {
-  animation: fadeInRight 1s ease-in-out forwards;
+  animation: fadeInRight 1s linear forwards;
 }
 
 .fadeOutLeft {
-  animation: fadeOutLeft 1s ease-in-out forwards;
+  animation: fadeOutLeft 1s linear forwards;
 }
 
 .fadeOutRight {
-  animation: fadeOutRight 1s ease-in-out forwards;
+  animation: fadeOutRight 1s linear forwards;
 }
 
 .img-div{
@@ -276,7 +317,27 @@ height: 400px;
   width: auto;
   }
 
+  .text-img{
+  height:100px
+  }
+
+  .sponsor-img{
+  height: 175px
+  }
+
+  .sponsor-card{
+  height: 250px
+  }
+
+  .sponsor-title{
+  height: 25px
+  }
+
 @media (max-width: 768px) {
+    .container-fluid{
+    width:100%
+    }
+
     .input{
       width: 85%
     }
@@ -285,17 +346,18 @@ height: 400px;
         display: flex;
         overflow-x: auto;
         scroll-behavior: smooth;
-        padding-left: 0px !important;
+        // padding-left: 60px !important;
         justify-content: center;
-        gap:15px;
+        // gap:90px;
     }
 
     .batch-circle {
-        width: 100px !important;
-        height: 100px !important;
-        min-width: 100px !important;
+        width: 110px !important;
+        height: 110px !important;
+        min-width: 110px !important;
         font-size: 25px !important;
-        margin-left:50px
+        margin-left:auto;
+        margin-right:auto
     }
 
     .carousel-control-batch-prev,
@@ -310,8 +372,6 @@ height: 400px;
     .carousel-control-batch-prev {
         left: 0;
     }
-
-    
 
     .carousel-control-next {
         right: 0;
@@ -349,6 +409,27 @@ height: 400px;
     font-size: 1rem; 
     bottom: 10px;      
   }
+
+   .text-img{
+  height:50px
+  }
+
+  .sponsor-img{
+  height: 125px
+  }
+
+  .sponsor-title {
+  font-size:15px;
+  height:15px
+  }
+
+    .sponsor-card{
+  height: 190px
+  }
+  .visit{
+ font-size: 18px;
+  font-weight: 600
+}
 }
   @media(max-width:400px){
   
@@ -360,12 +441,27 @@ height: 400px;
   .subheading {
     font-size: 0.8rem; 
     bottom: 10px;      
-  }}
+  }
+    
+  .text-img{
+  height:40px
+  }
+
+    .sponsor-title {
+  font-size:13px;
+  height:10px
+  }
+
+   .visit{
+ font-size: 16px;
+ font-weight: 600
+}
+  }
       `}
       </style>
       <UserNav />
       <div>
-        <div className="container-fluid rounded" style={{ width: "80%" }}>
+        <div className="container-fluid rounded">
           <Row className="d-flex align-items-center justify-content-center mt-2 mx-auto w-100">
             <Col sm={11} md={9} lg={9} className="img-div">
               <img
@@ -400,38 +496,64 @@ height: 400px;
                   position: "relative",
                   overflow: "hidden",
                   textAlign: "center",
+                  height: "120px", 
+                  padding:"0",
+                  marginBottom:"0"
                 }}
               >
-                <li className="d-flex justify-content-between align-items-center">
+                {/* First Item */}
+                <li
+                  className={`d-flex justify-content-between align-items-center ${
+                    activeItem === 0 ? "fadeIn" : "fadeOut"
+                  }`}
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    visibility: activeItem === 0 ? "visible" : "hidden",
+                  }}
+                >
                   <img
                     src={text}
-                    alt=""
-                    className={`img-fluid ${
+                    alt="text"
+                    className={`img-fluid text-img ${
                       animate === "fadeIn" ? "fadeInLeft" : "fadeOutLeft"
                     }`}
-                    style={{ maxWidth: "45%", height: "auto" }}
+                    style={{ maxWidth: "45%" }}
                   />
                   <img
                     src={goto}
-                    alt=""
+                    alt="goto"
                     className={`img-fluid ${
                       animate === "fadeIn" ? "fadeInRight" : "fadeOutRight"
                     }`}
                     style={{ maxWidth: "45%", height: "auto" }}
                   />
                 </li>
+
+                {/* Second Item */}
+                <li
+                  className={`${activeItem === 1 ? "fadeIn" : "fadeOut"}`}
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    visibility: activeItem === 1 ? "visible" : "hidden",
+                  }}
+                >
+                  <p className="visit"> Visit the Virtual <span style={{color:"#b2d12e"}}>Classrooms</span> <br /> of 2005 Batch</p>
+                 
+                </li>
               </ul>
             </Col>
           </Row>
 
-          <Row className="mt-2 w-100 mx-auto">
+          <Row className=" w-100 mx-auto">
             <div
               className="position-relative"
               style={{ padding: "30px 160px" }}
             >
               <div
                 ref={batchCarouselRef}
-                className="carousel-inner d-flex flex-row gap-5 justify-content-start overflow-auto"
+                className="carousel-inner d-flex flex-row justify-content-center overflow-auto"
                 style={{ scrollBehavior: "smooth", whiteSpace: "nowrap" }}
               >
                 {batches.length > 0 ? (
@@ -556,9 +678,8 @@ height: 400px;
               </Link>
             </Col>
           </Row>
-
           {sponsors.length > 0 ? (
-            <div>
+            <>
               <Row className="d-flex justify-content-center align-items-center">
                 <Col
                   sm={12}
@@ -566,74 +687,48 @@ height: 400px;
                   lg={6}
                   className="d-flex justify-content-center"
                 >
-                  <h1>Sponsors</h1>
+                  <h1>Sponsored By</h1>
                 </Col>
               </Row>
-              <Row className="sponsor mt-3">
-                <div
-                  className="position-relative"
-                  style={{ padding: "30px 160px" }}
-                >
-                  <div
-                    ref={sponsorCarouselRef}
-                    className="carousel-inner d-flex flex-row gap-5 justify-content-start overflow-auto"
-                    style={{ scrollBehavior: "smooth", whiteSpace: "nowrap" }}
-                  >
-                    {sponsors.length > 0 ? (
-                      sponsors.map((sponsor, index) => (
-                        <div key={index}>
-                          <Card
-                            style={{ width: "15rem", borderRadius: "40px" }}
-                          >
-                            <Card.Img
-                              variant="top"
-                              src={
-                                sponsor.profileImage
-                                  ? `${baseURL}/uploads/${sponsor.profileImage}`
-                                  : profile
-                              }
-                              height={"200px"}
-                              className="mt-5"
-                            />
-                            <Card.Body>
-                              <Card.Title className="text-center">
-                                {sponsor.name}
-                              </Card.Title>
-                            </Card.Body>
-                          </Card>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-center">Loading sponsors...</p>
-                    )}
-                  </div>
 
-                  <button
-                    className="carousel-control-prev"
-                    type="button"
-                    onClick={handleSponsorPrev}
+              <Row className="d-flex justify-content-center align-items-center mt-2">
+                {visibleSponsors.map((sponsor, index) => (
+                  <Col
+                    lg={3}
+                    xs={4}
+                    key={index}
+                    className="mb-4 mx-auto d-flex justify-content-center"
                   >
-                    <span
-                      className="carousel-control-prev-icon"
-                      aria-hidden="true"
-                    ></span>
-                    <span className="visually-hidden">Previous</span>
-                  </button>
-
-                  <button
-                    className="carousel-control-next"
-                    type="button"
-                    onClick={handleSponsorNext}
-                  >
-                    <span
-                      className="carousel-control-next-icon"
-                      aria-hidden="true"
-                    ></span>
-                    <span className="visually-hidden">Next</span>
-                  </button>
-                </div>
+                    <Card className="sponsor-card" style={{ width: "13rem" }}>
+                      <Card.Img
+                        variant="top"
+                        src={
+                          sponsor.profileImage
+                            ? `${baseURL}/uploads/${sponsor.profileImage}`
+                            : profile
+                        }
+                        className="sponsor-img "
+                      />
+                      <Card.Body>
+                        <Card.Title className="sponsor-title text-center">
+                          {sponsor.name}
+                        </Card.Title>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
               </Row>
-            </div>
+
+              <Row className="d-flex justify-content-center mt-3">
+                <p
+                  className="text-center"
+                  style={{ textDecoration: "underline", cursor: "pointer" }}
+                  onClick={() => setShowAllSponsors(!showAllSponsors)}
+                >
+                  {showAllSponsors ? "View Less" : "View All Sponsors"}
+                </p>
+              </Row>
+            </>
           ) : (
             <div></div>
           )}

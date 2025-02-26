@@ -280,9 +280,6 @@ option:hover {
                       <option value="female" className="custom-dropdown">
                         Female
                       </option>
-                      <option value="other" className="custom-dropdown">
-                        Other
-                      </option>
                     </Form.Select>
                   </Form.Group>
                 </Col>

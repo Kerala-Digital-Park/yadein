@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import logo from "../assets/logoc.png";
+import logo from "../assets/logo.png";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -103,7 +103,7 @@ function Header() {
             <img
               src={logo}
               alt="Logo"
-              width="100"
+              width="120"
               height="45"
               className="d-inline-block align-text-top"
             />

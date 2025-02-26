@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import logo from "../assets/logoc.png";
+import logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Nav.module.css";
 
@@ -75,8 +75,8 @@ function UserNav() {
               <img
                 alt="logo"
                 src={logo}
-                width="120"
-                height="60"
+                width="140"
+                height="50"
                 className="d-inline-block align-top"
               />
             </Link>
@@ -99,6 +99,20 @@ function UserNav() {
               id="navbarSupportedContent"
             >
               <ul className="navbar-nav mb-2 mb-lg-0 w-100">
+              <li className="nav-item">
+                  <Button
+                    as={Link}
+                    to="/"
+                    className="btn me-3 mb-2 mb-lg-0"
+                    style={{
+                      backgroundColor: "#b2d12e",
+                      border: "#b2d12e",
+                      color: "black",
+                    }}
+                  >
+                    Home
+                  </Button>
+                </li>
                 <li className="nav-item">
                   <Button
                     as={Link}

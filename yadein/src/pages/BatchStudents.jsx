@@ -23,7 +23,7 @@ function BatchStudents() {
       const response = await axios.get(
         `${baseURL}/admin/class-student-list?year=${year}&classForm=${classForm}`
       );
-      setStudents([...response.data]);
+      setStudents([...response.data.male,...response.data.female]);
     } catch (error) {
       console.error("Error listing students:", error.response?.data || error);
       setStudents([]);

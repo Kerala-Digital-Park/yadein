@@ -23,6 +23,7 @@ function AddStaff({ refreshStaffList }) {
 
   const handleClear = () => {
     setStaffs(initialState);
+    setImage("")
   };
 
   const handleImageChange = (e) => {
@@ -63,6 +64,7 @@ function AddStaff({ refreshStaffList }) {
         handleClear();
         handleClose();
         refreshStaffList();
+        setImage("");
       }
     } catch (error) {
       Swal.fire({

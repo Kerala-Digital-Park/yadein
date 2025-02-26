@@ -109,7 +109,6 @@ function AddStudent({ refreshStudentList }) {
       );
       
       if (result.status === 200) {
-        console.log("result",result.data);
         Swal.fire({
           icon: "success",
           title: "Student Added",
@@ -306,7 +305,6 @@ function AddStudent({ refreshStudentList }) {
                     <option value="">Select Gender</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
-                    <option value="other">Other</option>
                   </Form.Select>
                 </Form.Group>
               </div>

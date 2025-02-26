@@ -17,7 +17,8 @@ function Classes() {
   const { year } = useParams();
 
   const [classes, setClasses] = useState([]);
-  const [students, setStudents] = useState([]);
+  const [male, setMale] = useState([]);
+  const [female, setFemale] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [cls, setCls] = useState({});
   const [batch, setBatch] = useState("");
@@ -46,14 +47,15 @@ function Classes() {
   }, [year]);
 
   const fetchStudents = async (classId) => {
+
     try {
       const response = await axios.get(
         `${baseURL}/admin/class-student-list?year=${year}&classForm=${classId}`
       );
-      setStudents(response.data);
+      setMale(response.data.male);
+      setFemale(response.data.female);
     } catch (error) {
       console.error("Error listing students:", error.response?.data || error);
-      setStudents({ male: [], female: [], other: [] });
     }
   };
 
@@ -65,8 +67,7 @@ function Classes() {
         );
         setCls(response.data);
       } catch (error) {
-        console.error("Error listing students:", error.response?.data || error);
-        setStudents([]);
+        console.error("Error listing class:", error.response?.data || error);
       }
     };
     fetchClassById();
@@ -111,6 +112,7 @@ function Classes() {
     <>
       <style>
         {`
+
       .card-hover:hover{
         background-color: #b2d12e
       }
@@ -232,6 +234,20 @@ function Classes() {
       z-index: 10; /* Ensures UserNav appears above the video */
     }
 
+    .rollno{
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    background-color:rgb(0,171,102);
+    display: block;
+    margin: -10px auto;
+    border-radius: 100%;
+    padding: 2px 0 0 11px;
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    transform: translate(-50%, 0);
+    }
       `}
       </style>
       <ToastContainer position="top-center" autoClose={3000} />
@@ -394,102 +410,200 @@ function Classes() {
         </Row>
 
         <Row className="mt-5 justify-content-center g-2">
-          {students.length > 0 ? (
-            students.map((student) => (
-              <Col
-                key={student._id}
-                xs={6}
-                sm={6}
-                md={4}
-                lg={2}
-                className="d-flex justify-content-center"
-              >
-                <Card
-                  className="student-card"
-                  style={{ width: "160px", marginBottom: "15px" }}
-                >
-                  <Card.Img
-                    className="student-img"
-                    variant="top"
-                    style={{
-                      height: "160px",
-                      width: "100%",
-                      objectFit: "cover",
-                    }}
-                    src={
-                      student.profileImage
-                        ? `${baseURL}/uploads/${student.profileImage}`
-                        : profile
-                    }
-                    alt={student.name}
-                  />
-
-                  <div
-                    className="card-hover"
-                    style={{
-                      position: "absolute",
-                      color: "#fff",
-                      top: "0",
-                      height: "160px",
-                      width: "100%",
-                      opacity: "0.9",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "flex-end",
-                      paddingBottom: "10px",
-                    }}
-                  >
-                    <Link to={"/profile"} className="add">
-                      Add/Edit
-                    </Link>
-                    <Link to={"/profile"}>
-                      <i className="fa-solid fa-plus add-icon ms-2"></i>
-                    </Link>
-                    <div>
-                      {student.whatsapp && student.maskNumber === false && (
-                        <Link
-                          to={`https://api.whatsapp.com/send/?phone=${student.whatsapp}`}
-                          target="_blank"
-                        >
-                          <i className="fa-brands fa-whatsapp whatsapp-icon"></i>
-                        </Link>
-                      )}
-                      {student.facebook && (
-                        <Link to={student.facebook} target="_blank">
-                          <i className="fa-brands fa-facebook fb-icon"></i>
-                        </Link>
-                      )}
-                      {student.instagram && (
-                        <Link to={student.instagram} target="_blank">
-                          <i className="fa-brands fa-instagram insta-icon"></i>
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                  <Card.Body style={{ height: "90px" }}>
-                    <Card.Title
-                      className="text-center"
-                      style={{ fontSize: "16px" }}
+          {male?.length > 0 || female?.length > 0 ? (
+            <>
+              {male.length > 0 && (
+                <>
+                  <p className="text-center" style={{ fontSize: "40px" }}>
+                    Boys 👦
+                  </p>
+                  {male.map((student, index) => (
+                    <Col
+                      key={student._id}
+                      xs={6}
+                      sm={6}
+                      md={4}
+                      lg={2}
+                      className="d-flex justify-content-center"
                     >
-                      {student.name}
-                    </Card.Title>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))
+                      <Card
+                        className="student-card"
+                        style={{ width: "160px", marginBottom: "15px" }}
+                      >
+                        <Card.Img
+                          className="student-img"
+                          variant="top"
+                          style={{
+                            height: "160px",
+                            width: "100%",
+                            objectFit: "cover",
+                          }}
+                          src={
+                            student.profileImage
+                              ? `${baseURL}/uploads/${student.profileImage}`
+                              : profile
+                          }
+                          alt={student.name}
+                        />
+
+                        <div
+                          className="card-hover"
+                          style={{
+                            position: "absolute",
+                            color: "#fff",
+                            top: "0",
+                            height: "160px",
+                            width: "100%",
+                            opacity: "0.9",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            paddingBottom: "10px",
+                          }}
+                        >
+                          <Link to={"/profile"} className="add">
+                            Add/Edit
+                          </Link>
+                          <Link to={"/profile"}>
+                            <i className="fa-solid fa-plus add-icon ms-2"></i>
+                          </Link>
+                          <div>
+                            {student.whatsapp &&
+                              student.maskNumber === false && (
+                                <Link
+                                  to={`https://api.whatsapp.com/send/?phone=${student.whatsapp}`}
+                                  target="_blank"
+                                >
+                                  <i className="fa-brands fa-whatsapp whatsapp-icon"></i>
+                                </Link>
+                              )}
+                            {student.facebook && (
+                              <Link to={student.facebook} target="_blank">
+                                <i className="fa-brands fa-facebook fb-icon"></i>
+                              </Link>
+                            )}
+                            {student.instagram && (
+                              <Link to={student.instagram} target="_blank">
+                                <i className="fa-brands fa-instagram insta-icon"></i>
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                        <Card.Body style={{ height: "90px" }}>
+                          <Card.Title
+                            className="text-center"
+                            style={{ fontSize: "16px" }}
+                          >
+                            {student.name}
+                          </Card.Title>
+                        </Card.Body>
+                        <span className="rollno">{index+1}</span>
+                      </Card>
+                    </Col>
+                  ))}
+                </>
+              )}
+
+              {female?.length > 0 && (
+                <>
+                  <p className="text-center" style={{ fontSize: "40px" }}>
+                    Girls 👧
+                  </p>
+                  {female.map((student, index) => (
+                    <Col
+                      key={student._id}
+                      xs={6}
+                      sm={6}
+                      md={4}
+                      lg={2}
+                      className="d-flex justify-content-center"
+                    >
+                      <Card
+                        className="student-card"
+                        style={{ width: "160px", marginBottom: "15px" }}
+                      >
+                        <Card.Img
+                          className="student-img"
+                          variant="top"
+                          style={{
+                            height: "160px",
+                            width: "100%",
+                            objectFit: "cover",
+                          }}
+                          src={
+                            student.profileImage
+                              ? `${baseURL}/uploads/${student.profileImage}`
+                              : profile
+                          }
+                          alt={student.name}
+                        />
+
+                        <div
+                          className="card-hover"
+                          style={{
+                            position: "absolute",
+                            color: "#fff",
+                            top: "0",
+                            height: "160px",
+                            width: "100%",
+                            opacity: "0.9",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            paddingBottom: "10px",
+                          }}
+                        >
+                          <Link to={"/profile"} className="add">
+                            Add/Edit
+                          </Link>
+                          <Link to={"/profile"}>
+                            <i className="fa-solid fa-plus add-icon ms-2"></i>
+                          </Link>
+                          <div>
+                            {student.whatsapp &&
+                              student.maskNumber === false && (
+                                <Link
+                                  to={`https://api.whatsapp.com/send/?phone=${student.whatsapp}`}
+                                  target="_blank"
+                                >
+                                  <i className="fa-brands fa-whatsapp whatsapp-icon"></i>
+                                </Link>
+                              )}
+                            {student.facebook && (
+                              <Link to={student.facebook} target="_blank">
+                                <i className="fa-brands fa-facebook fb-icon"></i>
+                              </Link>
+                            )}
+                            {student.instagram && (
+                              <Link to={student.instagram} target="_blank">
+                                <i className="fa-brands fa-instagram insta-icon"></i>
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                        <Card.Body style={{ height: "90px" }}>
+                          <Card.Title
+                            className="text-center"
+                            style={{ fontSize: "16px" }}
+                          >
+                            {student.name}
+                          </Card.Title>
+                        </Card.Body>
+                        <span className="rollno">{index+1}</span>
+                      </Card>
+                    </Col>
+                  ))}
+                </>
+              )}
+              <hr style={{backgroundColor:"#004526", height:"5px",}}/>
+            </>
           ) : (
             <p className="text-center">No students</p>
           )}
-
           {!userId && (
-            <Col
-              xs={6}
-              sm={6}
-              md={4}
-              lg={2}
-              className="d-flex justify-content-center"
-            >
+            <Col lg={12} className="d-flex justify-content-center">
               <Card
                 className="student-card"
                 style={{
@@ -509,7 +623,7 @@ function Classes() {
                 <Card.Body style={{ height: "90px" }}>
                   <Card.Title
                     className="text-center"
-                    style={{ fontSize: "16px", color: "red" }}
+                    style={{ fontSize: "16px", color: "green" }}
                   >
                     Add Student
                   </Card.Title>

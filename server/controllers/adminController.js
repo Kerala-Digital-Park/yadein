@@ -543,7 +543,7 @@ exports.addSponsor = async (req, res) => {
 exports.listClassStudent = async (req, res) => {
   console.log("Inside adminController: list class student function");
   const { year, classForm } = req.query;
-
+  
   try {
     if (!year || !classForm) {
       return res.status(400).json({ error: "Year and classForm are required" });
@@ -560,31 +560,23 @@ exports.listClassStudent = async (req, res) => {
       return res.status(200).json([]);
     }
 
-    const groupedStudents = {
-      male: [],
-      female: [],
-      other: [],
-    };
+    // const groupedStudents = {
+    //   male: [],
+    //   female: []
+    // };
+
+    const male = []
+    const female = []
 
     studentList.forEach((student) => {
       if (student.gender === "male") {
-        groupedStudents.male.push(student);
-      } else if (student.gender === "female") {
-        groupedStudents.female.push(student);
+        male.push(student);
       } else {
-        groupedStudents.other.push(student);
-      }
+        female.push(student);
+      } 
     });
 
-    const sortedGroupedStudents = [
-      ...groupedStudents.male,
-      ...groupedStudents.female,
-      ...groupedStudents.other,
-    ];
-
-    console.log(sortedGroupedStudents);
-
-    res.status(200).json(sortedGroupedStudents);
+    res.status(200).json({male:male,female:female});
   } catch (error) {
     console.error("Error fetching students:", error);
     res.status(500).json({ error: "Error fetching students" });
